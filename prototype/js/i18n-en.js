@@ -629,7 +629,7 @@
     'Anda tidak dapat menonaktifkan akun sendiri.': 'You cannot deactivate your own account.', 'Gunakan halaman Akun saya untuk mengganti kata sandi sendiri.': 'Use My account to change your own password.',
     'Harus ada minimal satu Super Admin aktif.': 'At least one active Super Admin is required.', 'Akun tidak ditemukan. Muat ulang daftar.': 'Account not found. Reload the list.',
     'Anda tidak punya izin untuk tindakan ini.': 'You do not have permission for this action.', 'Terjadi kesalahan di server. Coba lagi.': 'Something went wrong on the server. Try again.',
-    'Akun saya': 'My account', 'Akun saya & kata sandi': 'My account & password', 'Ganti kata sandi sebelum melanjutkan.': 'Change your password before continuing.',
+    'Akun saya': 'My account', 'Selamat datang': 'Welcome back', 'Ingin memeriksa sertifikat?': 'Want to check a certificate?', 'Tema Soft UI · © Creative Tim (MIT)': 'Soft UI theme · © Creative Tim (MIT)', 'Akun saya & kata sandi': 'My account & password', 'Ganti kata sandi sebelum melanjutkan.': 'Change your password before continuing.',
     'Kata sandi Anda saat ini bersifat sementara.': 'Your current password is temporary.', 'Login sebelumnya': 'Previous sign-in', 'Ganti kata sandi': 'Change password',
     'Kata sandi saat ini': 'Current password', 'Kata sandi baru': 'New password', 'Ulangi kata sandi baru': 'Repeat new password',
     'Berisi huruf dan angka': 'Contains letters and digits', 'Tidak memuat nama pengguna': 'Does not contain the username', 'Konfirmasi sama dengan kata sandi baru': 'Confirmation matches the new password',

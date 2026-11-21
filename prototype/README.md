@@ -6,6 +6,14 @@ Purwarupa klikabel (HTML/CSS/JS murni, tanpa build) untuk **Training Assessment 
 
 Buka `prototype/index.html` langsung di browser. Halaman awal (`#home`) adalah peta prototipe berisi semua layar dan alur utama.
 
+## Tema
+
+Tampilan memakai bahasa visual **Soft UI Dashboard Tailwind** (Creative Tim, lisensi MIT; salinan lisensi di `assets/LICENSE-soft-ui-dashboard.txt`):
+font Open Sans, kartu putih tanpa garis dengan bayangan lembut, gradien 310° (ungu–magenta sebagai warna utama), sidebar terang dengan kotak ikon,
+badge status bergradasi, tombol huruf kapital, tab bergaya pil, dan halaman login dua kolom dengan gambar melengkung.
+Template aslinya berbasis kelas Tailwind; di sini token dan gaya komponennya diterjemahkan ke `styles.css` (token di bagian atas, lapisan komponen "SOFT UI" di bagian bawah), sehingga tidak perlu build Tailwind.
+Gambar latar dari template (`assets/img/curved0.jpg`, `curved6.jpg`) sudah dikompres. Mode gelap tetap tersedia.
+
 ## Bahasa (ID / EN)
 
 Setiap portal punya pemilih **ID | EN** di bilah atas. Pilihan bahasa diingat di browser. Layar dirender dalam Bahasa Indonesia, lalu `js/i18n.js` menerjemahkan teks yang tampil (termasuk modal, toast, tanggal, angka, dan format mata uang) memakai kamus `js/i18n-en.js`. Untuk menambah atau memperbaiki terjemahan, tambahkan pasangan teks Indonesia → Inggris di `dict`, atau pola di `rules` untuk teks yang memuat angka atau nama.

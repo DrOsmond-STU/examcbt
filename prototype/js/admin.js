@@ -21,14 +21,14 @@
     <aside class="sidebar" aria-label="Navigasi admin">
       <div class="sb-brand"><div class="logo">TA</div><div><b>TACMS</b><small>Admin Portal</small></div></div>
       <div class="sb-org">${ic('building', 'ic-sm')}<span class="grow">${esc(D.org.name)}</span>${ic('chevD', 'ic-sm')}</div>
-      ${NAV.map(([g, items]) => `<div class="sb-section">${g}</div>${items.map(([k, l, i, b]) => `<button class="sb-link ${route === k ? 'on' : ''}" data-go="${k}">${ic(i)}<span>${l}</span>${k === 'a-monitoring' ? '<span class="badge" style="background:#3cc3b6;color:#06231f">23</span>' : b ? `<span class="badge">${b}</span>` : ''}</button>`).join('')}`).join('')}
-      <div class="sb-foot"><div class="row" style="flex-wrap:nowrap"><div class="avatar avatar-sm">${App.initials(D.admin.name)}</div><div class="grow"><div style="color:#e5ecf9;font-weight:600">${esc(D.admin.name)}</div><div>${esc(D.admin.role)}</div></div><button class="icon-btn" style="color:var(--nav-fg-dim)" data-go="a-login" aria-label="Keluar">${ic('logout')}</button></div></div>
+      ${NAV.map(([g, items]) => `<div class="sb-section">${g}</div>${items.map(([k, l, i, b]) => `<button class="sb-link ${route === k ? 'on' : ''}" data-go="${k}"><span class="sb-ic">${ic(i)}</span><span>${l}</span>${k === 'a-monitoring' ? '<span class="badge badge-live">23</span>' : b ? `<span class="badge">${b}</span>` : ''}</button>`).join('')}`).join('')}
+      <div class="sb-foot"><div class="row" style="flex-wrap:nowrap"><div class="avatar avatar-sm">${App.initials(D.admin.name)}</div><div class="grow"><div style="color:#fff;font-weight:600">${esc(D.admin.name)}</div><div>${esc(D.admin.role)}</div></div><button class="icon-btn" style="color:var(--nav-fg-dim)" data-go="a-login" aria-label="Keluar">${ic('logout')}</button></div></div>
     </aside>
     <div class="scrim" data-action="navToggle"></div>
     <div class="main">
       <header class="topbar">
         <button class="icon-btn menu-btn" data-action="navToggle" aria-label="Menu">${ic('menu')}</button>
-        <div class="crumbs">${groupOf(route) !== titleOf(route) ? `${groupOf(route)} ${ic('chevR', 'ic-sm')} ` : ''}<b>${titleOf(route)}</b></div>
+        <div class="crumbs">${groupOf(route) !== titleOf(route) ? `${groupOf(route)} <span class="sep">/</span> ` : ''}<b>${titleOf(route)}</b></div>
         <label class="input-group search">${ic('search', 'ic-sm')}<input placeholder="Cari peserta, voucher, sertifikat…" aria-label="Pencarian global"><span class="tag">/</span></label>
         ${App.langToggle()}
         <button class="icon-btn" aria-label="Notifikasi" data-action="aNotif">${ic('bell')}</button>
@@ -86,12 +86,12 @@
     const W = 640, H = 220, L = 40, R = 10, T = 12, B = 30, max = 250;
     const bw = (W - L - R) / att.length;
     const y = (v) => T + (H - T - B) * (1 - v / max);
-    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Attempt per minggu, lulus dan tidak lulus">`;
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Attempt per minggu, lulus dan tidak lulus"><defs><linearGradient id="gPass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff0080"/><stop offset="1" stop-color="#7928ca"/></linearGradient></defs>`;
     [0, 50, 100, 150, 200, 250].forEach((v) => { s += `<line class="grid-line" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`; });
     att.forEach((a, i) => {
       const p = Math.round(a * rate[i]); const x = L + i * bw + bw * 0.2; const w = bw * 0.6;
-      s += `<rect x="${x}" y="${y(a)}" width="${w}" height="${y(p) - y(a)}" fill="var(--danger)" opacity=".55" rx="2"><title>${labels[i]}: ${a - p} tidak lulus</title></rect>`;
-      s += `<rect x="${x}" y="${y(p)}" width="${w}" height="${y(0) - y(p)}" fill="var(--teal)" rx="2"><title>${labels[i]}: ${p} lulus dari ${a}</title></rect>`;
+      s += `<rect x="${x}" y="${y(a)}" width="${w}" height="${y(p) - y(a)}" fill="rgba(255,255,255,.32)" rx="3"><title>${labels[i]}: ${a - p} tidak lulus</title></rect>`;
+      s += `<rect x="${x}" y="${y(p)}" width="${w}" height="${y(0) - y(p)}" fill="url(#gPass)" rx="3"><title>${labels[i]}: ${p} lulus dari ${a}</title></rect>`;
       s += `<text x="${x + w / 2}" y="${H - 10}" text-anchor="middle">${labels[i]}</text>`;
     });
     return s + '</svg>';
@@ -100,15 +100,15 @@
   App.routes['a-dashboard'] = () => shell('a-dashboard', `
     ${pageHead('Dashboard', 'Ringkasan operasional 21 November 2026, 10:45 WIB.', `<select class="select" style="width:auto;height:38px" aria-label="Periode"><option>12 minggu terakhir</option><option>30 hari</option><option>Tahun ini</option></select>${exportBtn}`)}
     <div class="grid g4">
-      <div class="card kpi"><span class="eyebrow">Peserta terdaftar</span><span class="v">1.284</span><span class="d"><span class="up">+86</span> bulan ini</span></div>
-      <div class="card kpi"><span class="eyebrow">Program pelatihan</span><span class="v">12</span><span class="d">8 aktif · 2 terjadwal · 2 selesai</span></div>
-      <div class="card kpi"><span class="eyebrow">Ujian berlangsung</span><span class="v" style="color:var(--teal)">23</span><span class="d">${pill('Live', 'teal')} 1 peserta terputus</span></div>
-      <div class="card kpi"><span class="eyebrow">Sertifikat terbit</span><span class="v">912</span><span class="d"><span class="up">+41</span> minggu ini · 3 menunggu</span></div>
+      <div class="card kpi has-ic"><div class="kpi-ic">${ic('users')}</div><span class="eyebrow">Peserta terdaftar</span><span class="v">1.284</span><span class="d"><span class="up">+86</span> bulan ini</span></div>
+      <div class="card kpi has-ic"><div class="kpi-ic">${ic('book')}</div><span class="eyebrow">Program pelatihan</span><span class="v">12</span><span class="d">8 aktif · 2 terjadwal · 2 selesai</span></div>
+      <div class="card kpi has-ic"><div class="kpi-ic">${ic('monitor')}</div><span class="eyebrow">Ujian berlangsung</span><span class="v">23</span><span class="d">${pill('Live', 'teal')} 1 peserta terputus</span></div>
+      <div class="card kpi has-ic"><div class="kpi-ic">${ic('award')}</div><span class="eyebrow">Sertifikat terbit</span><span class="v">912</span><span class="d"><span class="up">+41</span> minggu ini · 3 menunggu</span></div>
     </div>
     <div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr)" id="dash-a">
       <section class="card">
-        <div class="card-head"><div><h3>Attempt ujian per minggu</h3><p class="xs dim">Lulus dan tidak lulus · semua pelatihan</p></div><div class="legend"><span><i style="background:var(--teal)"></i>Lulus</span><span><i style="background:var(--danger);opacity:.55"></i>Tidak lulus</span></div></div>
-        <div class="card-body">${trendChart()}<div class="row small muted" style="margin-top:8px;gap:20px"><span>Total <b class="num" style="color:var(--fg)">2.031</b> attempt</span><span>Tingkat kelulusan <b class="num" style="color:var(--fg)">81,7%</b></span><span>Rata-rata nilai <b class="num" style="color:var(--fg)">76,4</b></span></div></div>
+        <div class="card-head"><div><h3>Attempt ujian per minggu</h3><p class="xs dim">Lulus dan tidak lulus · semua pelatihan</p></div><div class="legend"><span><i style="background:var(--g-primary)"></i>Lulus</span><span><i style="background:var(--chart-b)"></i>Tidak lulus</span></div></div>
+        <div class="card-body"><div class="chart-dark">${trendChart()}</div><div class="row small muted" style="margin-top:8px;gap:20px"><span>Total <b class="num" style="color:var(--fg)">2.031</b> attempt</span><span>Tingkat kelulusan <b class="num" style="color:var(--fg)">81,7%</b></span><span>Rata-rata nilai <b class="num" style="color:var(--fg)">76,4</b></span></div></div>
       </section>
       <section class="card">
         <div class="card-head"><h3>Status voucher</h3><button class="btn btn-ghost btn-sm" data-go="a-vouchers">Detail ${ic('chevR', 'ic-sm')}</button></div>
@@ -466,7 +466,7 @@
   App.routes['a-monitoring'] = () => shell('a-monitoring', `
     ${pageHead('Monitoring ujian', 'Diperbarui setiap 15 detik · 10:45:12 WIB', `<select class="select" style="width:auto;height:38px" aria-label="Ujian"><option>Semua ujian aktif</option><option>Data Analyst — Teori</option></select>`)}
     <div class="grid g4">
-      <div class="card kpi"><span class="eyebrow">Sedang mengerjakan</span><span class="v" style="color:var(--teal)">23</span><span class="d">dari 31 terjadwal hari ini</span></div>
+      <div class="card kpi"><span class="eyebrow">Sedang mengerjakan</span><span class="v">23</span><span class="d">dari 31 terjadwal hari ini</span></div>
       <div class="card kpi"><span class="eyebrow">Terputus</span><span class="v" style="color:var(--danger)">1</span><span class="d">Sesi masih dapat dilanjutkan</span></div>
       <div class="card kpi"><span class="eyebrow">Selesai hari ini</span><span class="v">41</span><span class="d">6 auto-submit karena waktu habis</span></div>
       <div class="card kpi"><span class="eyebrow">Sinyal integritas</span><span class="v" style="color:var(--warning)">3</span><span class="d">Perlu ditinjau, bukan bukti</span></div>

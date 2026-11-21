@@ -95,20 +95,21 @@
           <div class="row"><button class="btn btn-primary" data-go="${SES.home}">Lanjutkan</button><button class="btn btn-secondary" data-action="logout">${ic('logout')} Keluar</button></div>
         </section></div>`;
     }
-    return `<div class="verify" style="justify-content:center">
-      <section class="card verify-card card-pad stack-lg" style="max-width:420px">
-        <div class="row-between" style="flex-wrap:nowrap"><div class="row" style="flex-wrap:nowrap"><div class="logo">TA</div><div><b style="font:700 16px var(--font-display)">TACMS</b><div class="xs dim">${esc(D.org.name)}</div></div></div>${App.langToggle()}</div>
-        <div class="stack" style="gap:4px"><h2>Masuk</h2><p class="small muted">Masuk dengan akun yang diberikan administrator. Menu yang tampil mengikuti role Anda.</p></div>
+    return `<div class="auth-split">
+      <div class="auth-form"><div class="auth-form-inner">
+        <div class="row-between" style="flex-wrap:nowrap"><div class="row" style="flex-wrap:nowrap"><div class="logo">TA</div><div><b style="font:700 16px var(--font-display);color:var(--fg)">TACMS</b><div class="xs dim">${esc(D.org.name)}</div></div></div>${App.langToggle()}</div>
+        <div class="stack" style="gap:6px;margin-top:1rem"><h1 class="text-gradient">Selamat datang</h1><p class="muted">Masuk dengan akun yang diberikan administrator. Menu yang tampil mengikuti role Anda.</p></div>
         ${loginErr()}
-        <form class="stack" id="login-form" novalidate>
-          <div class="field"><label class="label" for="lg-u">Nama pengguna</label><input id="lg-u" class="input" autocomplete="username" autocapitalize="none" spellcheck="false" required value="${esc(S.loginUser || '')}"></div>
-          <div class="field"><label class="label" for="lg-pw">Kata sandi</label><input id="lg-pw" type="password" class="input" autocomplete="current-password" required></div>
-          <button class="btn btn-primary btn-lg btn-block" type="submit" id="lg-btn">Masuk</button>
+        <form class="stack-lg" id="login-form" novalidate>
+          <div class="field"><label class="label" for="lg-u">Nama pengguna</label><input id="lg-u" class="input" style="height:44px" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="Nama pengguna" value="${esc(S.loginUser || '')}"></div>
+          <div class="field"><label class="label" for="lg-pw">Kata sandi</label><input id="lg-pw" type="password" class="input" style="height:44px" autocomplete="current-password" required placeholder="Kata sandi"></div>
+          <button class="btn btn-info btn-lg btn-block" type="submit" id="lg-btn">Masuk</button>
         </form>
         <p class="xs dim">Setelah 5 kali gagal, akun dikunci sementara selama 15 menit. Semua upaya masuk tercatat di audit log.</p>
-        <hr class="hr">
-        <button class="btn btn-ghost btn-sm" style="align-self:flex-start" data-go="verify">${ic('shield', 'ic-sm')} Verifikasi sertifikat</button>
-      </section>
+        <p class="small" style="text-align:center">Ingin memeriksa sertifikat? <a href="#verify" data-go="verify" style="font-weight:700">Verifikasi sertifikat</a></p>
+        <p class="auth-foot">Tema Soft UI · © Creative Tim (MIT)</p>
+      </div></div>
+      <div class="auth-art" aria-hidden="true"><div></div></div>
     </div>`;
   };
   App.routes['a-login'] = App.routes.login;

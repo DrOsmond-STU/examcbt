@@ -96,10 +96,10 @@
       ${App.pageHead('Pengguna & role', 'Kelola akun yang dapat masuk ke TACMS. Semua perubahan tercatat di audit log.', canWrite ? `<button class="btn btn-primary" data-action="userCreate">${ic('plus')} Tambah pengguna</button>` : '')}
       ${!canWrite ? `<div class="callout callout-info">${ic('info')}<div class="small">Anda dapat melihat daftar pengguna, tetapi tidak dapat mengubahnya.</div></div>` : ''}
       <div class="grid g4">
-        <div class="card kpi"><span class="eyebrow">Total akun</span><span class="v">${um.users.length}</span></div>
-        <div class="card kpi"><span class="eyebrow">Aktif</span><span class="v" style="color:var(--success)">${count((u) => u.active)}</span></div>
-        <div class="card kpi"><span class="eyebrow">Nonaktif</span><span class="v">${count((u) => !u.active)}</span></div>
-        <div class="card kpi"><span class="eyebrow">Wajib ganti kata sandi</span><span class="v" style="color:var(--warning)">${count((u) => u.mustChange)}</span></div>
+        <div class="card kpi has-ic"><div class="kpi-ic">${ic('users')}</div><span class="eyebrow">Total akun</span><span class="v">${um.users.length}</span></div>
+        <div class="card kpi has-ic"><div class="kpi-ic">${ic('checkCircle')}</div><span class="eyebrow">Aktif</span><span class="v" style="color:var(--success)">${count((u) => u.active)}</span></div>
+        <div class="card kpi has-ic"><div class="kpi-ic">${ic('lock')}</div><span class="eyebrow">Nonaktif</span><span class="v">${count((u) => !u.active)}</span></div>
+        <div class="card kpi has-ic"><div class="kpi-ic">${ic('key')}</div><span class="eyebrow">Wajib ganti kata sandi</span><span class="v" style="color:var(--warning)">${count((u) => u.mustChange)}</span></div>
       </div>
       <section class="card">
         <div class="toolbar">
