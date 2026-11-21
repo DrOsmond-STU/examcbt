@@ -12,13 +12,10 @@ const LOGIN_MAX_FAILS      = 5;         // SRS FR-AUTH-005: batasi percobaan log
 const LOGIN_LOCK_SECONDS   = 900;       // kunci 15 menit
 const STORAGE_DIR          = __DIR__ . '/storage';
 
-function users(): array
+function users(bool $reload = false): array
 {
     static $users = null;
-    if ($users === null) {
-        $file = __DIR__ . '/users.php';
-        $users = is_file($file) ? require $file : [];
-    }
+    if ($users === null || $reload) $users = store_read();
     return $users;
 }
 
@@ -66,25 +63,66 @@ function check_csrf(): bool
     return is_string($sent) && !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], $sent);
 }
 
-/** Pengguna yang sedang masuk beserta role dan hak aksesnya, atau null. */
+/** Pengguna yang sedang masuk beserta role dan hak aksesnya, atau null.
+ *  Session otomatis tidak berlaku bila akun dinonaktifkan atau kata sandinya diganti/di-reset setelah login. */
 function current_user(): ?array
 {
     $uid = $_SESSION['uid'] ?? null;
     if (!$uid) return null;
     $u = users()[$uid] ?? null;
-    if (!$u || empty($u['active']) || !isset(ROLES[$u['role']])) return null;
+    $valid = $u && !empty($u['active']) && isset(ROLES[$u['role']])
+        && (int)($u['pw_changed_at'] ?? 0) <= (int)($_SESSION['auth_at'] ?? 0);
+    if (!$valid) {
+        $_SESSION = ['last' => time()];
+        return null;
+    }
     $role = ROLES[$u['role']];
     return [
-        'username'  => $uid,
-        'name'      => $u['name'],
-        'email'     => $u['email'],
-        'role'      => $u['role'],
-        'roleLabel' => $role['label'],
-        'home'      => $role['home'],
-        'routes'    => $role['routes'],
-        'perms'     => $role['perms'],
-        'bundles'   => $role['bundles'],
+        'username'   => $uid,
+        'name'       => $u['name'],
+        'email'      => $u['email'],
+        'role'       => $u['role'],
+        'roleLabel'  => $role['label'],
+        'home'       => $role['home'],
+        'routes'     => $role['routes'],
+        'perms'      => $role['perms'],
+        'bundles'    => $role['bundles'],
+        'mustChange' => !empty($u['must_change']),
+        'lastLogin'  => $u['prev_login'] ?? null,
     ];
+}
+
+function user_can(array $me, string $perm): bool
+{
+    return in_array('*', $me['perms'], true) || in_array($perm, $me['perms'], true);
+}
+
+function user_can_route(array $me, string $route): bool
+{
+    return in_array('*', $me['routes'], true) || in_array($route, $me['routes'], true);
+}
+
+/** Role yang boleh diberikan oleh pengguna ini (Super Admin hanya oleh Super Admin). */
+function assignable_roles(array $me): array
+{
+    if (!user_can($me, 'user.write')) return [];
+    $keys = array_keys(ROLES);
+    return $me['role'] === 'super_admin' ? $keys : array_values(array_filter($keys, fn($r) => $r !== 'super_admin'));
+}
+
+/** Untuk API: wajib login, dan pengguna yang wajib ganti kata sandi hanya boleh ke api/account.php. */
+function require_user(bool $allowMustChange = false): array
+{
+    $me = current_user();
+    if (!$me) json_out(['ok' => false, 'error' => 'auth'], 401);
+    if ($me['mustChange'] && !$allowMustChange) json_out(['ok' => false, 'error' => 'must_change'], 403);
+    return $me;
+}
+
+function read_json_body(): array
+{
+    $in = json_decode(file_get_contents('php://input') ?: '', true);
+    return is_array($in) ? $in : [];
 }
 
 function client_ip(): string
@@ -172,3 +210,5 @@ function json_out(array $data, int $code = 200): void
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+require __DIR__ . '/userstore.php';

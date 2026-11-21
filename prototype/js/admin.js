@@ -39,10 +39,12 @@
     </div>
     <div class="fab-admin">${App.protoFab()}</div>
   </div>`;
+  App.adminShell = (route, body) => shell(route, body);
   App.actions.navToggle = () => { S.navOpen = !S.navOpen; App.rerender(); };
   App.actions.aNotif = () => App.modal(`${App.modalHead('Notifikasi')}<div class="modal-body">${[['receipt', 'Bukti bayar ORD-2026-0324 diunggah Universitas Brawijaya.', '10 menit lalu'], ['wifi', 'Yusuf Hidayatullah terputus 47 detik dari ujian.', '12 menit lalu'], ['repeat', '2 pengajuan retake menunggu keputusan.', '1 jam lalu'], ['award', '3 sertifikat menunggu persetujuan.', 'Kemarin']].map(([i, t, d]) => `<div class="row" style="flex-wrap:nowrap;align-items:flex-start">${ic(i)}<div class="grow"><div class="small">${t}</div><div class="xs dim">${d}</div></div></div>`).join('<hr class="hr">')}</div>`);
 
   const pageHead = (title, desc, actions = '') => `<div class="page-head"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><div class="row">${actions}</div></div>`;
+  App.pageHead = (...a) => pageHead(...a);
   const toolbar = (search, filters = [], right = '') => `<div class="toolbar"><label class="input-group">${ic('search', 'ic-sm')}<input placeholder="${search}" ${filters.bind ? `data-bind="${filters.bind}"` : ''}></label>${filters.map((f) => `<select class="select" aria-label="${f[0]}">${f.map((o, i) => `<option>${i === 0 ? o + ': Semua' : o}</option>`).join('')}</select>`).join('')}<div class="grow"></div>${right}</div>`;
   const pager = (shown, total) => `<div class="pager"><span>Menampilkan ${shown} dari ${fmt(total)}</span><div class="pages"><button aria-label="Sebelumnya">‹</button><button class="on">1</button><button>2</button><button>3</button><button aria-label="Berikutnya">›</button></div></div>`;
   const exportBtn = `<button class="btn btn-secondary btn-sm" data-action="export">${ic('download', 'ic-sm')} Ekspor</button>`;

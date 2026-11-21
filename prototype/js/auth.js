@@ -19,7 +19,7 @@
   App.canRoute = (r) => {
     if (PUBLIC.includes(r)) return true;
     if (!SES.user) return false;
-    if (r === 'home') return true;
+    if (r === 'home' || r === 'account') return true;
     return SES.routes.includes('*') || SES.routes.includes(r);
   };
 
@@ -39,6 +39,7 @@
     genOk: 'cert.write', certReturn: 'cert.approve', certApprove: 'cert.approve', certRevoke: 'cert.write',
     export: 'report.export', exportOk: 'report.export',
     inviteUser: 'user.write', sessions: 'user.write',
+    userCreate: 'user.write', userCreateOk: 'user.write', userEdit: 'user.write', userEditOk: 'user.write', userReset: 'user.write', userToggle: 'user.write',
   };
   const permLabel = (p) => (SES.permLabels && SES.permLabels[p]) || p;
   const denied = (p) => App.toast(`Akses ditolak: ${esc(SES.user ? SES.user.roleLabel : 'Tamu')} tidak punya izin “${esc(permLabel(p))}”.`, 'lock');
@@ -143,6 +144,92 @@
     reloadAt('login');
   };
 
+  /* ---------- Helper API (session + CSRF) ---------- */
+  App.api = async (path, body) => {
+    const opt = { credentials: 'same-origin', cache: 'no-store', headers: {} };
+    if (body) { opt.method = 'POST'; opt.headers['Content-Type'] = 'application/json'; opt.headers['X-CSRF-Token'] = SES.csrf; opt.body = JSON.stringify(body); }
+    let r;
+    try { r = await fetch(path, opt); } catch (e) { return { ok: false, error: 'network' }; }
+    const j = await r.json().catch(() => ({ ok: false, error: 'server' }));
+    if (r.status === 401) reloadAt('login');
+    else if (j.error === 'must_change') reloadAt('account');
+    return j;
+  };
+  App.fmtDateTime = (iso) => (iso ? new Date(iso).toLocaleString(App.locale(), { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+
+  /* ---------- Akun saya: ganti kata sandi ---------- */
+  const PW_ERR = {
+    pw_short: () => `Kata sandi baru minimal ${SES.passwordMin} karakter.`,
+    pw_long: () => 'Kata sandi baru terlalu panjang (maksimal 200 karakter).',
+    pw_mix: () => 'Kata sandi baru harus berisi huruf dan angka.',
+    pw_username: () => 'Kata sandi baru tidak boleh memuat nama pengguna.',
+    pw_common: () => 'Kata sandi baru terlalu mudah ditebak. Hindari kata umum seperti password atau admin.',
+    pw_same: () => 'Kata sandi baru harus berbeda dari kata sandi saat ini.',
+    csrf: () => 'Sesi halaman kedaluwarsa. Muat ulang halaman lalu coba lagi.',
+    network: () => 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi.',
+  };
+  const pwRules = (pw, confirm) => [
+    [pw.length >= SES.passwordMin, `Minimal ${SES.passwordMin} karakter`],
+    [/[A-Za-z]/.test(pw) && /\d/.test(pw), 'Berisi huruf dan angka'],
+    [!!pw && !pw.toLowerCase().includes(SES.user.username.toLowerCase()), 'Tidak memuat nama pengguna'],
+    [!!pw && pw === confirm, 'Konfirmasi sama dengan kata sandi baru'],
+  ];
+  const rulesHTML = (pw, confirm) => pwRules(pw, confirm).map(([ok, t]) => `<li class="row" style="gap:8px;flex-wrap:nowrap;color:${ok ? 'var(--success)' : 'var(--fg-3)'}">${ic(ok ? 'checkCircle' : 'clock', 'ic-sm')}<span>${t}</span></li>`).join('');
+
+  App.routes.account = () => {
+    const u = SES.user;
+    const forced = SES.mustChange;
+    return `<div class="verify" style="justify-content:center">
+      <section class="card verify-card card-pad stack-lg" style="max-width:480px">
+        <div class="row-between" style="flex-wrap:nowrap"><div class="row" style="flex-wrap:nowrap"><div class="logo">TA</div><b style="font:700 16px var(--font-display)">TACMS</b></div>${App.langToggle()}</div>
+        ${forced ? `<div class="callout callout-warning">${ic('lock')}<div class="small"><b>Ganti kata sandi sebelum melanjutkan.</b> Kata sandi Anda saat ini bersifat sementara.</div></div>` : `<button class="btn btn-ghost btn-sm" style="align-self:flex-start" data-go="${SES.home}">${ic('arrowL', 'ic-sm')} Kembali</button>`}
+        <div class="stack" style="gap:4px"><h2>Akun saya</h2><p class="small muted">${esc(u.name)} · ${esc(u.roleLabel)}</p></div>
+        <dl class="dl"><dt>Nama pengguna</dt><dd class="mono">${esc(u.username)}</dd><dt>Email</dt><dd>${esc(u.email)}</dd><dt>Role</dt><dd>${esc(u.roleLabel)}</dd><dt>Login sebelumnya</dt><dd>${App.fmtDateTime(u.lastLogin)}</dd></dl>
+        <hr class="hr">
+        <h3>Ganti kata sandi</h3>
+        ${S.pwError ? `<div class="callout callout-danger" role="alert">${ic('alert')}<div class="small">${S.pwError}</div></div>` : ''}
+        <form class="stack" id="pw-form" novalidate>
+          <input type="text" autocomplete="username" value="${esc(u.username)}" hidden>
+          <div class="field"><label class="label" for="pw-cur">Kata sandi saat ini</label><input id="pw-cur" type="password" class="input" autocomplete="current-password" required></div>
+          <div class="field"><label class="label" for="pw-new">Kata sandi baru</label><input id="pw-new" type="password" class="input" autocomplete="new-password" required aria-describedby="pw-rules"></div>
+          <div class="field"><label class="label" for="pw-conf">Ulangi kata sandi baru</label><input id="pw-conf" type="password" class="input" autocomplete="new-password" required></div>
+          <ul id="pw-rules" class="stack small" style="list-style:none;margin:0;padding:0;gap:4px">${rulesHTML('', '')}</ul>
+          <label class="check"><input type="checkbox" id="pw-show"><span class="small">Tampilkan kata sandi</span></label>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" id="pw-btn">Simpan kata sandi baru</button>
+        </form>
+        <p class="xs dim">Setelah kata sandi diganti, semua sesi lain untuk akun ini otomatis keluar.</p>
+        <button class="btn btn-ghost btn-sm" style="align-self:flex-start" data-action="logout">${ic('logout', 'ic-sm')} Keluar</button>
+      </section></div>`;
+  };
+  App.after.account = () => {
+    const f = document.getElementById('pw-form');
+    if (!f) return;
+    const cur = document.getElementById('pw-cur'), nw = document.getElementById('pw-new'), cf = document.getElementById('pw-conf');
+    const upd = () => { document.getElementById('pw-rules').innerHTML = rulesHTML(nw.value, cf.value); };
+    nw.addEventListener('input', upd); cf.addEventListener('input', upd);
+    document.getElementById('pw-show').addEventListener('change', (e) => { [cur, nw, cf].forEach((i) => { i.type = e.target.checked ? 'text' : 'password'; }); });
+    cur.focus();
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!cur.value) { S.pwError = 'Masukkan kata sandi saat ini.'; return App.rerender(); }
+      if (pwRules(nw.value, cf.value).some(([ok]) => !ok)) { S.pwError = 'Kata sandi baru belum memenuhi semua syarat di bawah.'; return App.rerender(); }
+      const btn = document.getElementById('pw-btn'); btn.disabled = true; btn.textContent = App.t('Menyimpan…');
+      const j = await App.api('api/account.php', { current: cur.value, new: nw.value });
+      if (j.ok) {
+        S.pwError = '';
+        SES.csrf = j.csrf;
+        if (SES.mustChange) { reloadAt(j.home); return; }
+        App.rerender();
+        App.toast('Kata sandi berhasil diganti');
+        return;
+      }
+      S.pwError = j.error === 'current' ? `Kata sandi saat ini salah. Sisa ${j.left} percobaan.`
+        : j.error === 'locked' ? `Terlalu banyak percobaan. Coba lagi dalam ${j.minutes} menit.`
+        : (PW_ERR[j.error] || (() => 'Terjadi kesalahan di server. Coba lagi.'))();
+      App.rerender();
+    });
+  };
+
   /* ---------- Halaman akses ditolak ---------- */
   const forbidden = (r) => `<div class="verify" style="justify-content:center">
     <section class="card verify-card card-pad stack-lg" style="max-width:520px">
@@ -169,7 +256,7 @@
         </div>
         <p class="xs dim">Hak akses diatur oleh server berdasarkan role. Hubungi Organization Admin untuk perubahan role.</p>
       </div>
-      <div class="modal-foot"><button class="btn btn-secondary" data-action="logout">${ic('logout')} Keluar</button><button class="btn btn-primary" data-action="closeModal">Tutup</button></div>`);
+      <div class="modal-foot"><button class="btn btn-secondary" data-action="logout">${ic('logout')} Keluar</button><button class="btn btn-secondary" data-go="account">${ic('key')} Akun saya &amp; kata sandi</button><button class="btn btn-primary" data-action="closeModal">Tutup</button></div>`);
   };
 
   /* ---------- Bilah sesi ---------- */
@@ -208,6 +295,7 @@
     let r = App.route();
     if (!SES.user && !PUBLIC.includes(r)) { if (location.hash !== '#login') { history.replaceState(null, '', '#login'); } r = 'login'; }
     if (SES.user && (!location.hash || location.hash === '#')) { history.replaceState(null, '', '#' + SES.home); r = SES.home; }
+    if (SES.user && SES.mustChange && r !== 'account') { history.replaceState(null, '', '#account'); r = 'account'; }
     if (!App.canRoute(r) || !App.routes[r]) {
       App.closeModal();
       document.getElementById('app').innerHTML = forbidden(r);

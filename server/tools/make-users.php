@@ -2,6 +2,7 @@
 /**
  * Membuat app/users.php berisi akun demo per role dengan kata sandi acak (disimpan sebagai hash bcrypt).
  * Pemakaian: php server/tools/make-users.php <file-output-kredensial>
+ * Semua akun wajib mengganti kata sandi saat login pertama.
  * Kata sandi asli hanya ditulis ke file kredensial yang Anda tentukan, bukan ke repo atau server.
  */
 $accounts = [
@@ -26,7 +27,7 @@ $creds = "username\trole\tpassword\n";
 foreach ($accounts as $u => [$name, $email, $role]) {
     $pw = $gen();
     $hash = password_hash($pw, PASSWORD_BCRYPT, ['cost' => 11]);
-    $out .= sprintf("    %s => ['name' => %s, 'email' => %s, 'role' => %s, 'active' => true, 'hash' => %s],\n",
+    $out .= sprintf("    %s => ['name' => %s, 'email' => %s, 'role' => %s, 'active' => true, 'must_change' => true, 'hash' => %s],\n",
         var_export($u, true), var_export($name, true), var_export($email, true), var_export($role, true), var_export($hash, true));
     $creds .= "$u\t$role\t$pw\n";
 }

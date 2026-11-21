@@ -190,12 +190,13 @@
       <div class="modal-foot"><button class="btn btn-secondary" data-action="closeModal">Batal</button><button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-action="confirmOk" data-reason="${reason ? 1 : 0}">${confirmText}</button></div>`);
   };
   App.actions.confirmOk = (el) => {
+    let v = '';
     if (el.dataset.reason === '1') {
-      const v = document.getElementById('cf-reason').value.trim();
+      v = document.getElementById('cf-reason').value.trim();
       if (!v) { document.getElementById('cf-err').hidden = false; return; }
     }
     App.closeModal();
-    if (App._confirmOk) App._confirmOk();
+    if (App._confirmOk) App._confirmOk(v);
   };
 
   /* ---------- Toast ---------- */

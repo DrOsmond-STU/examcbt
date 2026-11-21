@@ -13,17 +13,25 @@ $csrf = $user ? csrf_token() : null;   // tamu mengambil token lewat api/csrf.ph
 $js = ['core.js', 'i18n-en.js', 'i18n.js', 'data.js', 'hub.js'];
 if ($user) {
     if (in_array('participant', $user['bundles'], true)) $js[] = 'participant.js';
-    if (in_array('admin', $user['bundles'], true))       $js[] = 'admin.js';
+    if (in_array('admin', $user['bundles'], true))       { $js[] = 'admin.js'; $js[] = 'users.js'; }
 }
 $js[] = 'auth.js';
 
 $session = [
-    'user'    => $user ? array_intersect_key($user, array_flip(['username', 'name', 'email', 'role', 'roleLabel'])) : null,
+    'user'    => $user ? array_intersect_key($user, array_flip(['username', 'name', 'email', 'role', 'roleLabel', 'lastLogin'])) : null,
+    'mustChange' => $user['mustChange'] ?? false,
+    'passwordMin' => PASSWORD_MIN,
     'home'    => $user['home'] ?? 'login',
     'routes'  => $user['routes'] ?? [],
     'perms'   => $user['perms'] ?? [],
     'permLabels' => PERMISSIONS,
     'roles'   => array_map(fn($r) => $r['label'], ROLES),
+    // Matriks role → permission, langsung dari rbac.php (ditampilkan di halaman Pengguna & Role)
+    'roleMatrix' => $user && user_can_route($user, 'a-users') ? array_map(fn($r) => [
+        'label'  => $r['label'],
+        'perms'  => $r['perms'] === ['*'] ? array_keys(PERMISSIONS) : $r['perms'],
+        'routes' => $r['routes'] === ['*'] ? count(ADMIN_ROUTES) + count(PARTICIPANT_ROUTES) : count($r['routes']),
+    ], ROLES) : null,
     'csrf'    => $csrf,
     'idle'    => SESSION_IDLE_SECONDS,
 ];

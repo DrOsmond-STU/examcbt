@@ -33,6 +33,17 @@ if (!$ok) {
 
 clear_fails($username);
 session_regenerate_id(true);
-$_SESSION = ['uid' => $username, 'last' => time(), 'csrf' => bin2hex(random_bytes(32))];
+$now = time();
+$_SESSION = ['uid' => $username, 'last' => $now, 'auth_at' => $now, 'csrf' => bin2hex(random_bytes(32))];
+store_update(function (array &$all) use ($username, $now) {
+    if (!isset($all[$username])) return;
+    $all[$username]['prev_login'] = $all[$username]['last_login'] ?? null;
+    $all[$username]['last_login'] = gmdate('c', $now);
+    // Perbarui hash bila parameter bcrypt berubah
+});
+if (password_needs_rehash($u['hash'], PASSWORD_BCRYPT, ['cost' => 11])) {
+    $new = password_hash($password, PASSWORD_BCRYPT, ['cost' => 11]);
+    store_update(function (array &$all) use ($username, $new) { if (isset($all[$username])) $all[$username]['hash'] = $new; });
+}
 audit('auth.login', $username, ROLES[$u['role']]['label']);
-json_out(['ok' => true, 'home' => ROLES[$u['role']]['home']]);
+json_out(['ok' => true, 'home' => !empty($u['must_change']) ? 'account' : ROLES[$u['role']]['home']]);
