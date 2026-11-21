@@ -161,6 +161,8 @@
     if (e.key === 'Escape' && document.querySelector('.overlay')) App.closeModal();
   });
   App.binds = {};
+  // Semua form ditangani lewat script; jangan pernah kirim ke URL lain
+  document.addEventListener('submit', (e) => e.preventDefault());
   App.changes = {};
 
   /* ---------- Modal / drawer ---------- */

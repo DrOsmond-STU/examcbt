@@ -542,6 +542,10 @@
     [/^Ujian Kompetensi (.+) — Teori$/, 'Competency Exam: $1 — Theory'],
     [/^Masuk sebagai (.+)$/, 'Signed in as $1'],
     [/^OTP dikirim ke email dan (.+)$/, 'OTP sent to email and $1'],
+    [/^Nama pengguna atau kata sandi salah\. Sisa (\d+) percobaan\.$/, 'Incorrect username or password. $1 attempts left.'],
+    [/^Terlalu banyak percobaan\. Coba lagi dalam (\d+) menit\.$/, 'Too many attempts. Try again in $1 minutes.'],
+    [/^Akses ditolak: (.+) tidak punya izin “(.+)”\.$/, (m, r, p) => `Access denied: ${tr(r)} does not have the “${tr(p)}” permission.`],
+    [/^Perlu izin: (.+)$/, (m, p) => `Requires permission: ${tr(p)}`],
     [/^Hari ini$/, 'Today'],
   ];
   // Pastikan aturan "Ujian Kompetensi" dicek sebelum aturan umum "— Teori"
@@ -577,6 +581,21 @@
     'Data Analyst Associate — Teori': 'Data Analyst Associate — Theory', 'Data Analyst Associate — Praktik': 'Data Analyst Associate — Practical',
     'Ujian Kompetensi Data Analyst Associate — Teori': 'Competency Exam: Data Analyst Associate — Theory',
     'Data Analyst Associate — Batch Januari': 'Data Analyst Associate — January Batch', 'Rekap peserta pelatihan November 2026': 'Training participant summary, November 2026',
+    // Login & RBAC (versi ter-deploy)
+    'Masuk dengan akun yang diberikan administrator. Menu yang tampil mengikuti role Anda.': 'Sign in with the account your administrator gave you. The menu you see depends on your role.',
+    'Nama pengguna': 'Username', 'Memeriksa…': 'Checking…', 'Nama pengguna dan kata sandi wajib diisi.': 'Username and password are required.',
+    'Sesi halaman kedaluwarsa. Muat ulang halaman lalu coba lagi.': 'This page session has expired. Reload the page and try again.',
+    'Nama pengguna atau kata sandi salah.': 'Incorrect username or password.',
+    'Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi.': 'Cannot reach the server. Check your connection and try again.',
+    'Verifikasi sertifikat': 'Verify a certificate', 'Anda sudah masuk': 'You are already signed in', 'Akses ditolak': 'Access denied',
+    'Halaman ini tidak termasuk hak akses role': 'This page is not part of the access granted to the role', 'Ke halaman utama saya': 'Go to my home page',
+    'Hak akses saya': 'My access', 'Halaman yang dapat dibuka': 'Pages you can open', 'Izin aksi': 'Action permissions', 'Diizinkan': 'Allowed', 'Baca saja': 'Read only',
+    'Hak akses diatur oleh server berdasarkan role. Hubungi Organization Admin untuk perubahan role.': 'Access is set by the server based on your role. Contact an Organization Admin to change roles.',
+    'Masuk sebagai': 'Signed in as', 'Tidak termasuk hak akses role Anda': 'Not included in your role’s access',
+    'Kelola enrollment & jadwal': 'Manage enrollment & schedules', 'Kelola voucher & order': 'Manage vouchers & orders', 'Verifikasi pembayaran': 'Verify payments',
+    'Susun ujian': 'Build exams', 'Intervensi ujian berjalan': 'Intervene in running exams', 'Menilai essay & praktik': 'Grade essays & practicals',
+    'Putuskan pengajuan retake': 'Decide retake requests', 'Buat & cabut sertifikat': 'Create & revoke certificates', 'Setujui penerbitan sertifikat': 'Approve certificate issuance',
+    'Ekspor laporan': 'Export reports', 'Kelola pengguna & role': 'Manage users & roles', 'Examiner (Penguji)': 'Examiner',
     'Hari ini': 'Today', 'Enrollment aktif': 'Active enrollment', 'Pengguna & role': 'Users & roles', 'Telepon utama · WhatsApp': 'Primary phone · WhatsApp', 'Mode': 'Mode',
   });
 

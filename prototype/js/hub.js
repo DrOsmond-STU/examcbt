@@ -101,6 +101,23 @@
     </div>
   </div>`;
 
+  /* ---------- Sertifikat (komponen bersama) ---------- */
+  App.certHTML = ({ name = '{{participant_name}}', title = 'Certificate of Competency', training = '{{training_name}}', no = '{{certificate_number}}', date = '{{issue_date}}', vars = false } = {}) => {
+    const v = (s) => (vars && s.startsWith('{{') ? `<span class="var">${s}</span>` : esc(s));
+    return `<div class="cert"><div class="cert-inner">
+      <div class="c-org">${esc(D.org.name)}</div>
+      <div class="c-title">${esc(title)}</div>
+      <div class="c-sub">Diberikan kepada</div>
+      <div class="c-name">${v(name)}</div>
+      <div class="c-body">atas keberhasilan memenuhi standar kompetensi pada program <b>${v(training)}</b> berdasarkan asesmen teori dan praktik.</div>
+      <div class="c-foot">
+        <div>${App.qr(no)}<div style="margin-top:.6cqw">No. ${v(no)}</div></div>
+        <div class="c-sign"><div class="line"></div><b>Ir. Hendrawan Saputro, M.T.</b><div>Ketua ${esc(D.org.short)}</div></div>
+        <div style="text-align:right">Diterbitkan<br>${v(date)}</div>
+      </div>
+    </div></div>`;
+  };
+
   /* ---------- Verifikasi publik (SRS 9.7) ---------- */
   const lookup = (raw) => {
     const q = raw.trim().toUpperCase();
@@ -143,7 +160,7 @@
       </div>
       <section class="card verify-card card-pad stack-lg">
         <div class="stack" style="gap:6px"><h1>Cek keaslian sertifikat</h1><p class="muted">Masukkan nomor sertifikat seperti tertulis pada dokumen, atau pindai QR Code pada sertifikat.</p></div>
-        <form class="stack" data-form="verify" onsubmit="return false">
+        <form class="stack" data-form="verify">
           <div class="field"><label class="label" for="v-no">Nomor sertifikat</label>
             <input id="v-no" class="input input-mono" placeholder="LSPTN/DA/2026/00731" value="${esc(S.verifyInput)}" data-bind="verifyInput" autocomplete="off"></div>
           <div class="row"><button class="btn btn-primary" data-action="verify">${ic('search')} Periksa</button><button class="btn btn-secondary" data-action="verifyQr">${ic('qr')} Pindai QR</button></div>

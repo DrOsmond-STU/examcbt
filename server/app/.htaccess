@@ -1,0 +1,2 @@
+# Folder ini di luar document root. Aturan ini hanya pengaman tambahan.
+Require all denied

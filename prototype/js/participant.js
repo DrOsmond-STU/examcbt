@@ -547,23 +547,6 @@
         <tbody>${rows}</tbody></table></div></section>`);
   };
 
-  /* ---------- Sertifikat (komponen bersama) ---------- */
-  App.certHTML = ({ name = '{{participant_name}}', title = 'Certificate of Competency', training = '{{training_name}}', no = '{{certificate_number}}', date = '{{issue_date}}', vars = false } = {}) => {
-    const v = (s) => (vars && s.startsWith('{{') ? `<span class="var">${s}</span>` : esc(s));
-    return `<div class="cert"><div class="cert-inner">
-      <div class="c-org">${esc(D.org.name)}</div>
-      <div class="c-title">${esc(title)}</div>
-      <div class="c-sub">Diberikan kepada</div>
-      <div class="c-name">${v(name)}</div>
-      <div class="c-body">atas keberhasilan memenuhi standar kompetensi pada program <b>${v(training)}</b> berdasarkan asesmen teori dan praktik.</div>
-      <div class="c-foot">
-        <div>${App.qr(no)}<div style="margin-top:.6cqw">No. ${v(no)}</div></div>
-        <div class="c-sign"><div class="line"></div><b>Ir. Hendrawan Saputro, M.T.</b><div>Ketua ${esc(D.org.short)}</div></div>
-        <div style="text-align:right">Diterbitkan<br>${v(date)}</div>
-      </div>
-    </div></div>`;
-  };
-
   App.routes['p-certs'] = () => {
     const pass = S.exam.submitted && S.resultScenario === 'pass';
     return shell('p-certs', `

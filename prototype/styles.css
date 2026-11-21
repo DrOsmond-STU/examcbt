@@ -534,3 +534,13 @@ code, .mono { font-family: var(--font-mono); font-size: .92em; }
 .hub-hero .lang-seg button { color: #c5d2ea; }
 .hub-hero .lang-seg button.on { background: #fff; color: #0e2148; }
 @media (max-width: 520px) { .pp-top .pp-brand > div:not(.logo) { display: none; } }
+
+/* RBAC (versi ter-deploy) */
+.is-denied { opacity: .42; cursor: not-allowed !important; filter: grayscale(.4); }
+.session-chip { gap: 6px; padding: 0 8px; }
+.session-chip .tag { background: var(--brand-soft); color: var(--brand); }
+@media (max-width: 640px) { .session-chip .session-name, .session-chip .tag { display: none; } }
+.hub-session { margin-top: 18px; gap: 8px; color: #d4def1; font-size: var(--fs-sm); }
+.hub-session .btn-secondary { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); color: #fff; }
+
+[hidden] { display: none !important; }
