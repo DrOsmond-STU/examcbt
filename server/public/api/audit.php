@@ -65,10 +65,14 @@ $parseDay = function (string $d, bool $end) use ($tz): ?int {
 };
 $from = $parseDay((string)($_GET['from'] ?? ''), false);
 $to   = $parseDay((string)($_GET['to'] ?? ''), true);
-$cats = ['auth' => 'auth.', 'user' => 'user.', 'account' => 'account.', 'enrollment' => 'enrollment.', 'audit' => 'audit.'];
+$cats = ['auth' => 'auth.', 'user' => 'user.', 'account' => 'account.', 'enrollment' => 'enrollment.', 'voucher' => ['voucher.', 'otp.', 'participant.'], 'audit' => 'audit.'];
 
 $filtered = array_values(array_filter($all, function (array $e) use ($q, $cat, $actor, $from, $to, $cats) {
-    if ($cat !== '' && isset($cats[$cat]) && strpos($e['action'], $cats[$cat]) !== 0) return false;
+    if ($cat !== '' && isset($cats[$cat])) {
+        $hit = false;
+        foreach ((array)$cats[$cat] as $pre) if (strpos($e['action'], $pre) === 0) $hit = true;
+        if (!$hit) return false;
+    }
     if ($actor !== '' && $e['actor'] !== $actor) return false;
     $ts = strtotime($e['t']);
     if ($from !== null && $ts < $from) return false;

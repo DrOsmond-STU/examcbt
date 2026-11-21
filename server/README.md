@@ -10,16 +10,17 @@ Live: https://examcbt.semestateknologiutama.com
 │   ├── index.php      ← memilih modul antarmuka sesuai role (modul lain tidak dikirim)
 │   ├── styles.css
 │   ├── .htaccess      ← paksa HTTPS, header keamanan
-│   └── api/           ← csrf, login, logout, ping, users, account, audit, enrollments (enrollment & voucher)
+│   └── api/           ← csrf, login, logout, ping, users, account, audit, enrollments, activation (aktivasi voucher & masuk OTP), participant (portal peserta)
 └── app/               ← di luar document root
     ├── rbac.php       ← role, halaman, permission
     ├── bootstrap.php  ← session, CSRF, pembatasan login, audit log
     ├── userstore.php  ← penyimpanan akun (users.json) & aturan kata sandi
+    ├── config.php     ← pengaturan OTP & reservasi voucher
     ├── catalog.php    ← katalog pelatihan, ujian, batch voucher (data awal)
     ├── enrollstore.php← penyimpanan enrollment, peserta, voucher (enrollment.json)
     ├── users.php      ← data akun awal (hash bcrypt) — tidak di-commit
     ├── assets/js/     ← modul antarmuka (dari prototype/js)
-    └── storage/       ← users.json, enrollment.json, secret.key, login_attempts.json, audit.log
+    └── storage/       ← users.json, enrollment.json, secret.key, login_attempts.json, audit.log, sesi aktivasi disimpan di session PHP
 ```
 
 ## Role & hak akses
@@ -83,7 +84,23 @@ Hak akses: Super Admin, Organization Admin, Training Admin, dan **Penguji** (Add
 Enrollment tidak membuka akses ujian; voucher tetap wajib dimasukkan peserta.
 Tercatat di audit log sebagai `enrollment.bulk_create` dan `enrollment.cancel`.
 
-Catatan purwarupa: katalog pelatihan/ujian/batch masih data awal di `catalog.php`, dan alur aktivasi voucher di portal peserta belum membaca kode dari enrollment ini.
+Catatan purwarupa: katalog pelatihan/ujian/batch masih data awal di `catalog.php`.
+
+## Aktivasi voucher peserta
+
+Peserta tidak memerlukan akun berkata sandi. Dari halaman login → **Aktivasi voucher** (atau `#p-start`):
+
+1. **Voucher** — kode dicocokkan (HMAC) dengan voucher hasil enrollment. Harus berstatus ALLOCATED, enrollment aktif, order dibayar, batch belum kedaluwarsa, dan tidak sedang dicadangkan sesi lain. Voucher dicadangkan 15 menit. Pesan gagal tidak membocorkan data; 5 kode salah per IP mengunci pemeriksaan 15 menit.
+2. **Identitas** — email harus sama dengan email peserta penerima voucher (petunjuk email tersamar ditampilkan). Telepon wajib.
+3. **OTP email & telepon** — 6 digit, disimpan sebagai hash di session, berlaku 5 menit, maks. 5 percobaan, kirim ulang setelah 60 detik (kode lama batal).
+4. **Ikat** — voucher ALLOCATED → BOUND, kontak ditandai terverifikasi, peserta langsung masuk portal.
+
+Dashboard peserta menampilkan ujian dari enrollment beserta gate akses (identitas, enrollment, jadwal, voucher, pembayaran, hak attempt). Tombol "Buka ujian" hanya aktif bila semua syarat terpenuhi dan dalam jadwal; ruang ujian sendiri masih simulasi.
+Peserta yang sudah masuk dapat memasukkan voucher berikutnya dan langsung terikat. Peserta lama masuk lewat **Masuk dengan OTP** (`#p-login`); respons sama untuk email terdaftar/tidak.
+
+**Mode demo OTP:** belum ada penyedia email/WhatsApp/SMS, jadi `OTP_DEMO_DISPLAY = true` di `app/config.php` menampilkan kode di layar dengan label "Mode demo". Setelah penyedia dipasang, isi `otp_deliver()` di `enrollstore.php`, set `OTP_DEMO_DISPLAY = false`, dan (untuk email via `mail()` server) `OTP_SEND_EMAIL = true`.
+
+Audit: `voucher.reserve`, `voucher.bind`, `voucher.check_fail`, `voucher.identity_mismatch`, `otp.fail`, `participant.login`, `participant.login_fail`.
 
 ## Audit log
 
@@ -101,6 +118,7 @@ Kartu "Aktivitas terbaru" di dashboard juga memakai data ini untuk role tersebut
 | `user.create` / `user.update` / `user.activate` / `user.deactivate` / `user.reset_password` | Pengelolaan pengguna |
 | `account.change_password` / `account.change_password_fail` | Ganti kata sandi sendiri |
 | `enrollment.bulk_create` / `enrollment.cancel` | Enrollment massal, pembatalan enrollment |
+| `voucher.*` / `otp.fail` / `participant.*` | Aktivasi voucher, OTP, masuk peserta |
 | `audit.export` | Ekspor audit log |
 
 Catatan: 24 baris paling awal di file log server (IP `127.0.0.1`, 21 Nov 2026 10:05 UTC) berasal dari pengujian lokal yang ikut terunggah satu kali, bukan aktivitas nyata.

@@ -6,19 +6,33 @@
 declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 
+require_once __DIR__ . '/../app/enrollstore.php';
+
 resume_session();
 $user = session_status() === PHP_SESSION_ACTIVE ? current_user() : null;
-$csrf = $user ? csrf_token() : null;   // tamu mengambil token lewat api/csrf.php saat login
+// Peserta yang masuk lewat aktivasi voucher / OTP (tanpa akun berkata sandi)
+if (!$user && session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['pid'])) {
+    $p = current_participant();
+    if ($p) {
+        $user = [
+            'username' => $p['no'], 'name' => $p['name'], 'email' => $p['email'], 'role' => 'participant', 'roleLabel' => ROLES['participant']['label'],
+            'home' => 'p-dashboard', 'routes' => PARTICIPANT_ROUTES, 'perms' => [], 'bundles' => ['participant'], 'mustChange' => false, 'lastLogin' => null, 'via' => 'otp',
+        ];
+    }
+}
+// Tamu tanpa session mengambil token lewat api/csrf.php; bila session sudah ada (mis. di tengah aktivasi), halaman tidak di-cache dan token disertakan.
+$csrf = session_status() === PHP_SESSION_ACTIVE ? csrf_token() : null;
 
 $js = ['core.js', 'i18n-en.js', 'i18n.js', 'data.js', 'hub.js'];
-if ($user) {
-    if (in_array('participant', $user['bundles'], true)) $js[] = 'participant.js';
-    if (in_array('admin', $user['bundles'], true))       { $js[] = 'admin.js'; $js[] = 'users.js'; $js[] = 'audit.js'; $js[] = 'enroll.js'; }
-}
+// Portal peserta (termasuk aktivasi voucher) dikirim ke tamu dan peserta; modul admin hanya ke role admin.
+$isParticipantPortal = !$user || in_array('participant', $user['bundles'], true);
+if ($isParticipantPortal) { $js[] = 'participant.js'; $js[] = 'activation.js'; }
+if ($user && in_array('admin', $user['bundles'], true)) { $js[] = 'admin.js'; $js[] = 'users.js'; $js[] = 'audit.js'; $js[] = 'enroll.js'; }
 $js[] = 'auth.js';
 
 $session = [
-    'user'    => $user ? array_intersect_key($user, array_flip(['username', 'name', 'email', 'role', 'roleLabel', 'lastLogin'])) : null,
+    'user'    => $user ? array_intersect_key($user, array_flip(['username', 'name', 'email', 'role', 'roleLabel', 'lastLogin', 'via'])) : null,
+    'otpDemo' => OTP_DEMO_DISPLAY,
     'mustChange' => $user['mustChange'] ?? false,
     'passwordMin' => PASSWORD_MIN,
     'home'    => $user['home'] ?? 'login',
@@ -45,7 +59,7 @@ $hashes = implode(' ', array_map(fn($c) => "'sha256-" . base64_encode(hash('sha2
 
 header('Content-Type: text/html; charset=utf-8');
 header('Vary: Cookie');
-header($user ? 'Cache-Control: private, no-store' : 'Cache-Control: public, max-age=0, s-maxage=10');
+header(($user || $csrf) ? 'Cache-Control: private, no-store' : 'Cache-Control: public, max-age=0, s-maxage=10');
 header("Content-Security-Policy: default-src 'self'; script-src $hashes; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
 ?><!doctype html>
 <html lang="id">

@@ -9,7 +9,8 @@
   const S = App.state;
   const D = window.DATA;
   const { ic, esc, pill } = App;
-  const PUBLIC = ['login', 'a-login', 'verify'];
+  // Halaman tanpa login: login staf, verifikasi sertifikat, aktivasi voucher & masuk peserta dengan OTP
+  const PUBLIC = ['login', 'a-login', 'verify', 'p-start', 'p-identity', 'p-otp', 'p-login'];
   /* Muat ulang halaman pada route tertentu (session berubah → server mengirim modul yang sesuai role) */
   const reloadAt = (route) => { history.replaceState(null, '', location.pathname + location.search + '#' + route); location.reload(); };
 
@@ -107,6 +108,7 @@
           <button class="btn btn-info btn-lg btn-block" type="submit" id="lg-btn">Masuk</button>
         </form>
         <p class="xs dim">Setelah 5 kali gagal, akun dikunci sementara selama 15 menit. Semua upaya masuk tercatat di audit log.</p>
+        <div class="panel stack" style="gap:8px"><span class="small" style="font-weight:700;color:var(--fg)">Peserta ujian?</span><div class="row"><button type="button" class="btn btn-secondary btn-sm" data-go="p-start">${ic('ticket', 'ic-sm')} Aktivasi voucher</button><button type="button" class="btn btn-ghost btn-sm" data-go="p-login">Masuk dengan OTP</button></div></div>
         <p class="small" style="text-align:center">Ingin memeriksa sertifikat? <a href="#verify" data-go="verify" style="font-weight:700">Verifikasi sertifikat</a></p>
         <p class="auth-foot">Tema Soft UI · © Creative Tim (MIT)</p>
       </div></div>
@@ -179,6 +181,7 @@
   const rulesHTML = (pw, confirm) => pwRules(pw, confirm).map(([ok, t]) => `<li class="row" style="gap:8px;flex-wrap:nowrap;color:${ok ? 'var(--success)' : 'var(--fg-3)'}">${ic(ok ? 'checkCircle' : 'clock', 'ic-sm')}<span>${t}</span></li>`).join('');
 
   App.routes.account = () => {
+    if (SES.user && SES.user.via === 'otp') { setTimeout(() => App.go('p-dashboard')); return ''; } // peserta OTP tidak punya kata sandi
     const u = SES.user;
     const forced = SES.mustChange;
     return `<div class="verify" style="justify-content:center">
@@ -258,7 +261,7 @@
         </div>
         <p class="xs dim">Hak akses diatur oleh server berdasarkan role. Hubungi Organization Admin untuk perubahan role.</p>
       </div>
-      <div class="modal-foot"><button class="btn btn-secondary" data-action="logout">${ic('logout')} Keluar</button><button class="btn btn-secondary" data-go="account">${ic('key')} Akun saya &amp; kata sandi</button><button class="btn btn-primary" data-action="closeModal">Tutup</button></div>`);
+      <div class="modal-foot"><button class="btn btn-secondary" data-action="logout">${ic('logout')} Keluar</button>${SES.user.via === 'otp' ? '' : `<button class="btn btn-secondary" data-go="account">${ic('key')} Akun saya &amp; kata sandi</button>`}<button class="btn btn-primary" data-action="closeModal">Tutup</button></div>`);
   };
 
   /* ---------- Bilah sesi ---------- */

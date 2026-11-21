@@ -49,6 +49,8 @@
     ${App.protoFab(fab)}
   </div>`;
 
+  App.pPreShell = preShell;
+  App.pShell = shell;
   App.actions.pNotif = () => App.modal(`${App.modalHead('Notifikasi')}<div class="modal-body">
     ${[['ticket', 'Voucher TACMS-7K4Q-•••• berhasil diaktifkan.', '21 Nov · 08:51'], ['calendar', 'Ujian Teori Data Analyst dimulai hari ini pukul 09:00 WIB.', '21 Nov · 07:00'], ['award', 'Sertifikat Cyber Security Awareness telah diterbitkan.', '29 Okt · 14:20']]
       .map(([i, t, d]) => `<div class="row" style="align-items:flex-start;flex-wrap:nowrap">${ic(i)}<div class="grow"><div class="small">${t}</div><div class="xs dim">${d}</div></div></div>`).join('<hr class="hr">')}

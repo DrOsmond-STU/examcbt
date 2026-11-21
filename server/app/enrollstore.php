@@ -125,3 +125,99 @@ function public_enrollment(array $d, array $e): array
         'createdAt' => $e['created_at'], 'createdBy' => $e['created_by'], 'cancelReason' => $e['cancel_reason'] ?? null,
     ];
 }
+
+/* =====================================================================
+   Aktivasi voucher & portal peserta
+   ===================================================================== */
+require_once __DIR__ . '/config.php';
+
+function mask_email(string $email): string
+{
+    $at = strpos($email, '@');
+    if ($at === false) return '•••';
+    return substr($email, 0, min(2, $at)) . '•••' . substr($email, $at);
+}
+
+function mask_phone(string $phone): string
+{
+    $d = preg_replace('/\D/', '', $phone);
+    return strlen($d) < 6 ? '•••' : '+' . substr($d, 0, 4) . '••••' . substr($d, -2);
+}
+
+/**
+ * Peserta yang sedang masuk: lewat akun berkata sandi ber-role Peserta (dicocokkan dengan email),
+ * atau lewat aktivasi voucher / masuk dengan OTP ($_SESSION['pid']).
+ */
+function current_participant(?array $d = null): ?array
+{
+    $d = $d ?? enroll_read();
+    $u = current_user();
+    if ($u && $u['role'] === 'participant') {
+        $no = find_participant_by_email($d, $u['email']);
+        return ['no' => $no, 'via' => 'account', 'name' => $u['name'], 'email' => $u['email']] + ($no ? $d['participants'][$no] : []);
+    }
+    $pid = $_SESSION['pid'] ?? null;
+    if ($pid && isset($d['participants'][$pid])) return ['no' => $pid, 'via' => 'otp'] + $d['participants'][$pid];
+    return null;
+}
+
+/* ---------- OTP (disimpan di session sebagai hash) ---------- */
+function otp_issue(array &$slot, string $target): string
+{
+    $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    $slot = ['hash' => password_hash($code, PASSWORD_DEFAULT), 'target' => $target, 'exp' => time() + OTP_TTL, 'tries' => 0, 'sent' => time(), 'verified' => false];
+    return $code;
+}
+
+/** 'ok' | 'wrong' | 'expired' | 'locked' | 'none' */
+function otp_check(array &$slot, string $code): string
+{
+    if (empty($slot['hash'])) return 'none';
+    if (!empty($slot['verified'])) return 'ok';
+    if ($slot['tries'] >= OTP_MAX_TRIES) return 'locked';
+    if (time() > $slot['exp']) return 'expired';
+    $slot['tries']++;
+    if (!preg_match('/^\d{6}$/', $code) || !password_verify($code, $slot['hash'])) return $slot['tries'] >= OTP_MAX_TRIES ? 'locked' : 'wrong';
+    $slot['verified'] = true;
+    $slot['hash'] = '';   // OTP yang berhasil tidak dapat dipakai lagi
+    return 'ok';
+}
+
+/** Kirim OTP. Mengembalikan true bila benar-benar terkirim lewat penyedia. */
+function otp_deliver(string $channel, string $target, string $code): bool
+{
+    if ($channel === 'email' && OTP_SEND_EMAIL) {
+        $subject = 'Kode verifikasi TACMS';
+        $body = "Kode verifikasi Anda: $code\nBerlaku 5 menit. Jangan berikan kode ini kepada siapa pun.";
+        return @mail($target, $subject, $body, 'From: ' . MAIL_FROM);
+    }
+    return false; // WhatsApp/SMS belum memiliki penyedia
+}
+
+/* ---------- Gate akses ujian (Addendum v1.1 §4) ---------- */
+function enrollment_view(array $d, array $e, array $p): array
+{
+    $now = time();
+    $start = strtotime($e['start']); $end = strtotime($e['end']);
+    $v = !empty($e['voucher_hash']) ? ($d['vouchers'][$e['voucher_hash']] ?? null) : null;
+    $batch = $e['batch'] ? (VOUCHER_BATCHES[$e['batch']] ?? null) : null;
+    $identity = !empty($p['email_verified_at']) && !empty($p['phone_verified_at']);
+    $active = in_array($e['status'], ['SCHEDULED', 'IN_PROGRESS'], true);
+    $sched = $now < $start ? 'upcoming' : ($now <= $end ? 'open' : 'closed');
+    $vState = !$v ? 'none' : ($v['status'] === 'BOUND' && $v['participant'] === $p['no'] ? 'bound' : ($v['status'] === 'ALLOCATED' ? 'allocated' : 'invalid'));
+    $paid = $batch && in_array($batch['order_status'], ['PAID', 'CONFIRMED'], true);
+    $gates = [
+        ['identity', $identity],
+        ['enrollment', $active],
+        ['schedule', $sched === 'open' ? true : ($sched === 'upcoming' ? 'wait' : false)],
+        ['voucher', $vState === 'bound'],
+        ['payment', $vState === 'none' ? false : $paid],
+        ['entitlement', $vState === 'bound' && $active],
+    ];
+    $base = public_enrollment($d, $e);
+    return $base + [
+        'scheduleState' => $sched, 'voucherState' => $vState, 'boundAt' => $v['bound_at'] ?? null,
+        'gates' => array_map(fn($g) => ['key' => $g[0], 'ok' => $g[1]], $gates),
+        'canStart' => !in_array(false, array_column($gates, 1), true) && !in_array('wait', array_column($gates, 1), true),
+    ];
+}
