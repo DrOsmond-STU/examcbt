@@ -9,7 +9,7 @@
  */
 
 const ADMIN_ROUTES = [
-    'a-dashboard', 'a-trainings', 'a-participants', 'a-enrollments', 'a-vouchers', 'a-questions',
+    'a-dashboard', 'a-trainings', 'a-training-enroll', 'a-participants', 'a-enrollments', 'a-vouchers', 'a-questions',
     'a-exam-builder', 'a-monitoring', 'a-grading', 'a-retake', 'a-certificates', 'a-reports', 'a-audit', 'a-users',
 ];
 const PARTICIPANT_ROUTES = [
@@ -21,7 +21,7 @@ const PARTICIPANT_ROUTES = [
 const PERMISSIONS = [
     'training.write'    => 'Kelola pelatihan',
     'participant.write' => 'Kelola peserta',
-    'enrollment.write'  => 'Kelola enrollment & jadwal',
+    'enrollment.write'  => 'Kelola enrollment, jadwal & alokasi voucher',
     'voucher.write'     => 'Kelola voucher & order',
     'payment.verify'    => 'Verifikasi pembayaran',
     'question.write'    => 'Kelola bank soal',
@@ -56,7 +56,7 @@ const ROLES = [
     'training_admin' => [
         'label'   => 'Training Admin',
         'home'    => 'a-dashboard',
-        'routes'  => ['a-dashboard', 'a-trainings', 'a-participants', 'a-enrollments', 'a-vouchers', 'a-questions',
+        'routes'  => ['a-dashboard', 'a-trainings', 'a-training-enroll', 'a-participants', 'a-enrollments', 'a-vouchers', 'a-questions',
                       'a-exam-builder', 'a-monitoring', 'a-retake', 'a-certificates', 'a-reports', 'a-users'],
         'perms'   => ['training.write', 'participant.write', 'enrollment.write', 'voucher.write', 'report.export'],
         'bundles' => ['admin'],
@@ -65,7 +65,7 @@ const ROLES = [
         'label'   => 'Exam Admin',
         'home'    => 'a-dashboard',
         // Rute peserta dibuka untuk preview ujian (langkah 7 Exam Builder).
-        'routes'  => ['a-dashboard', 'a-trainings', 'a-participants', 'a-vouchers', 'a-questions', 'a-exam-builder',
+        'routes'  => ['a-dashboard', 'a-trainings', 'a-training-enroll', 'a-participants', 'a-vouchers', 'a-questions', 'a-exam-builder',
                       'a-monitoring', 'a-grading', 'a-retake', 'a-reports', 'a-users', ...PARTICIPANT_ROUTES],
         'perms'   => ['question.write', 'exam.write', 'exam.publish', 'monitoring.write', 'grade.write', 'retake.decide', 'report.export'],
         'bundles' => ['admin', 'participant'],
@@ -73,14 +73,15 @@ const ROLES = [
     'examiner' => [
         'label'   => 'Examiner (Penguji)',
         'home'    => 'a-grading',
-        'routes'  => ['a-dashboard', 'a-participants', 'a-enrollments', 'a-monitoring', 'a-grading', 'a-reports'],
-        'perms'   => ['grade.write'],
+        'routes'  => ['a-dashboard', 'a-trainings', 'a-training-enroll', 'a-participants', 'a-enrollments', 'a-monitoring', 'a-grading', 'a-reports'],
+        // Addendum v1.1 §2: Penguji boleh membuat enrollment & mengatur jadwal; tidak berwenang mengesahkan pembayaran.
+        'perms'   => ['grade.write', 'enrollment.write'],
         'bundles' => ['admin'],
     ],
     'certificate_admin' => [
         'label'   => 'Certificate Admin',
         'home'    => 'a-certificates',
-        'routes'  => ['a-dashboard', 'a-trainings', 'a-participants', 'a-certificates', 'a-reports', 'a-users'],
+        'routes'  => ['a-dashboard', 'a-trainings', 'a-training-enroll', 'a-participants', 'a-certificates', 'a-reports', 'a-users'],
         'perms'   => ['cert.write', 'cert.approve', 'report.export'],
         'bundles' => ['admin'],
     ],

@@ -152,7 +152,7 @@
         <tbody>${D.trainings.map((t) => `<tr>
           <td class="mono small">${t.code}</td><td class="cell-title">${t.name}</td><td>${t.cat}</td><td class="num">${t.date}</td>
           <td class="t-right num">${t.participants}</td><td class="t-right num">${t.exams}</td><td><span class="tag">${t.cert}</span></td><td>${status(t.status)}</td>
-          <td class="t-right"><div class="row" style="flex-wrap:nowrap;justify-content:flex-end;gap:2px"><button class="btn btn-ghost btn-sm" data-action="trainingDetail" data-code="${t.code}">Detail</button><button class="icon-btn" aria-label="Edit" data-action="newTraining">${ic('edit', 'ic-sm')}</button>${t.status !== 'Diarsipkan' ? `<button class="icon-btn" aria-label="Arsipkan" data-action="archiveTraining" data-code="${t.code}">${ic('trash', 'ic-sm')}</button>` : ''}</div></td>
+          <td class="t-right"><div class="row" style="flex-wrap:nowrap;justify-content:flex-end;gap:2px"><button class="icon-btn" aria-label="Detail" title="Detail" data-action="trainingDetail" data-code="${t.code}">${ic('eye', 'ic-sm')}</button><button class="icon-btn" aria-label="Edit" data-action="newTraining">${ic('edit', 'ic-sm')}</button>${t.status !== 'Diarsipkan' ? `<button class="icon-btn" aria-label="Arsipkan" data-action="archiveTraining" data-code="${t.code}">${ic('trash', 'ic-sm')}</button>` : ''}</div></td>
         </tr>`).join('')}</tbody>
       </table></div>
       ${pager(6, 12)}

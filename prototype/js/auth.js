@@ -39,6 +39,7 @@
     genOk: 'cert.write', certReturn: 'cert.approve', certApprove: 'cert.approve', certRevoke: 'cert.write',
     export: 'report.export', exportOk: 'report.export',
     inviteUser: 'user.write', sessions: 'user.write',
+    enrollWizard: 'enrollment.write', enrollSubmit: 'enrollment.write', enrollCancel: 'enrollment.write',
     userCreate: 'user.write', userCreateOk: 'user.write', userEdit: 'user.write', userEditOk: 'user.write', userReset: 'user.write', userToggle: 'user.write',
   };
   const permLabel = (p) => (SES.permLabels && SES.permLabels[p]) || p;

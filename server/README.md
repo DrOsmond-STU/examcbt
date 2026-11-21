@@ -10,14 +10,16 @@ Live: https://examcbt.semestateknologiutama.com
 │   ├── index.php      ← memilih modul antarmuka sesuai role (modul lain tidak dikirim)
 │   ├── styles.css
 │   ├── .htaccess      ← paksa HTTPS, header keamanan
-│   └── api/           ← csrf, login, logout, ping, users (kelola pengguna), account (ganti kata sandi), audit (audit log)
+│   └── api/           ← csrf, login, logout, ping, users, account, audit, enrollments (enrollment & voucher)
 └── app/               ← di luar document root
     ├── rbac.php       ← role, halaman, permission
     ├── bootstrap.php  ← session, CSRF, pembatasan login, audit log
     ├── userstore.php  ← penyimpanan akun (users.json) & aturan kata sandi
+    ├── catalog.php    ← katalog pelatihan, ujian, batch voucher (data awal)
+    ├── enrollstore.php← penyimpanan enrollment, peserta, voucher (enrollment.json)
     ├── users.php      ← data akun awal (hash bcrypt) — tidak di-commit
     ├── assets/js/     ← modul antarmuka (dari prototype/js)
-    └── storage/       ← users.json, login_attempts.json, audit.log
+    └── storage/       ← users.json, enrollment.json, secret.key, login_attempts.json, audit.log
 ```
 
 ## Role & hak akses
@@ -64,6 +66,25 @@ php server/tools/make-users.php /path/aman/credentials.tsv
 server/build.sh
 ```
 
+## Enrollment voucher massal
+
+Menu **Pelatihan** → tombol **Enroll** di setiap pelatihan berstatus Aktif/Terjadwal → **Tambah peserta**:
+
+1. **Peserta** — tempel daftar (nama, email, telepon; bisa langsung dari Excel), unggah CSV (template tersedia), dan/atau pilih dari data peserta.
+2. **Ujian & jadwal** — ujian, tanggal, jam, zona waktu (WIB/WITA/WIT), kebijakan keterlambatan.
+3. **Voucher** — alokasikan dari batch yang order-nya sudah PAID/CONFIRMED dan belum kedaluwarsa, atau tanpa voucher.
+4. **Tinjau** — server memvalidasi setiap baris: peserta baru, peserta terdaftar (dicocokkan lewat email), email/nama tidak valid, duplikat di daftar, sudah ter-enroll di ujian yang sama, jadwal bentrok. Hanya baris yang lolos yang didaftarkan.
+
+Setelah disimpan, satu kode voucher unik per peserta ditampilkan **sekali** (bisa diunduh CSV/disalin). Server hanya menyimpan HMAC-SHA256 kode (kunci di `storage/secret.key`) dan versi tersamar.
+Kuota batch berkurang otomatis; pembatalan enrollment mencabut voucher yang belum dipakai dan mengembalikan kuota.
+Maksimal 500 peserta per proses. Menu **Enrollment & Jadwal** menampilkan semua enrollment asli dengan filter dan pembatalan.
+
+Hak akses: Super Admin, Organization Admin, Training Admin, dan **Penguji** (Addendum v1.1 §2) dapat menambah/membatalkan; Exam Admin, Certificate Admin, dan Auditor hanya melihat.
+Enrollment tidak membuka akses ujian; voucher tetap wajib dimasukkan peserta.
+Tercatat di audit log sebagai `enrollment.bulk_create` dan `enrollment.cancel`.
+
+Catatan purwarupa: katalog pelatihan/ujian/batch masih data awal di `catalog.php`, dan alur aktivasi voucher di portal peserta belum membaca kode dari enrollment ini.
+
 ## Audit log
 
 Semua kejadian keamanan ditulis ke `app/storage/audit.log` (satu baris JSON per kejadian: waktu UTC, aktor, role saat kejadian, aksi, IP, detail).
@@ -79,6 +100,7 @@ Kartu "Aktivitas terbaru" di dashboard juga memakai data ini untuk role tersebut
 | `auth.fail` / `auth.locked` | Gagal masuk, login dikunci sementara |
 | `user.create` / `user.update` / `user.activate` / `user.deactivate` / `user.reset_password` | Pengelolaan pengguna |
 | `account.change_password` / `account.change_password_fail` | Ganti kata sandi sendiri |
+| `enrollment.bulk_create` / `enrollment.cancel` | Enrollment massal, pembatalan enrollment |
 | `audit.export` | Ekspor audit log |
 
 Catatan: 24 baris paling awal di file log server (IP `127.0.0.1`, 21 Nov 2026 10:05 UTC) berasal dari pengujian lokal yang ikut terunggah satu kali, bukan aktivitas nyata.
