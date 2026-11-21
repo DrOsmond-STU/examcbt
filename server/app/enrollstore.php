@@ -13,7 +13,7 @@ function enroll_empty(): array
 {
     $p = [];
     foreach (SEED_PARTICIPANTS as $s) $p[$s['no']] = $s + ['created_at' => null, 'created_by' => 'seed'];
-    return ['seq' => ['par' => 427, 'enr' => 0], 'participants' => $p, 'enrollments' => [], 'vouchers' => []];
+    return ['seq' => ['par' => 427, 'enr' => 0, 'att' => 58000, 'ret' => 0, 'cert' => 700], 'participants' => $p, 'enrollments' => [], 'vouchers' => [], 'attempts' => [], 'retakes' => [], 'certificates' => []];
 }
 
 function enroll_lock()
@@ -26,11 +26,12 @@ function enroll_lock()
 
 function enroll_load_unlocked(): array
 {
-    if (is_file(ENROLL_FILE)) {
-        $d = json_decode((string)file_get_contents(ENROLL_FILE), true);
-        if (is_array($d)) return $d;
-    }
-    return enroll_empty();
+    $d = null;
+    if (is_file(ENROLL_FILE)) $d = json_decode((string)file_get_contents(ENROLL_FILE), true);
+    if (!is_array($d)) $d = enroll_empty();
+    foreach (['attempts', 'retakes', 'certificates', 'vouchers', 'enrollments'] as $k) $d[$k] = $d[$k] ?? [];
+    $d['seq'] = ($d['seq'] ?? []) + ['par' => 427, 'enr' => 0, 'att' => 58000, 'ret' => 0, 'cert' => 700];
+    return $d;
 }
 
 function enroll_read(): array
@@ -130,6 +131,7 @@ function public_enrollment(array $d, array $e): array
    Aktivasi voucher & portal peserta
    ===================================================================== */
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/engine.php';
 
 function mask_email(string $email): string
 {
@@ -204,20 +206,26 @@ function enrollment_view(array $d, array $e, array $p): array
     $identity = !empty($p['email_verified_at']) && !empty($p['phone_verified_at']);
     $active = in_array($e['status'], ['SCHEDULED', 'IN_PROGRESS'], true);
     $sched = $now < $start ? 'upcoming' : ($now <= $end ? 'open' : 'closed');
-    $vState = !$v ? 'none' : ($v['status'] === 'BOUND' && $v['participant'] === $p['no'] ? 'bound' : ($v['status'] === 'ALLOCATED' ? 'allocated' : 'invalid'));
+    $vState = !$v ? 'none' : (in_array($v['status'], ['BOUND', 'REDEEMED'], true) && $v['participant'] === $p['no'] ? 'bound' : ($v['status'] === 'ALLOCATED' ? 'allocated' : 'invalid'));
     $paid = $batch && in_array($batch['order_status'], ['PAID', 'CONFIRMED'], true);
+    $rs = retake_state($d, $e);
+    $entitled = $vState === 'bound' && $active && ($rs['state'] === 'in_progress' || (in_array($rs['state'], ['none', 'available'], true) && $rs['used'] < $rs['allowed']));
     $gates = [
         ['identity', $identity],
         ['enrollment', $active],
         ['schedule', $sched === 'open' ? true : ($sched === 'upcoming' ? 'wait' : false)],
         ['voucher', $vState === 'bound'],
         ['payment', $vState === 'none' ? false : $paid],
-        ['entitlement', $vState === 'bound' && $active],
+        ['entitlement', $entitled],
     ];
     $base = public_enrollment($d, $e);
+    $cfg = exam_cfg($e['exam']);
     return $base + [
         'scheduleState' => $sched, 'voucherState' => $vState, 'boundAt' => $v['bound_at'] ?? null,
         'gates' => array_map(fn($g) => ['key' => $g[0], 'ok' => $g[1]], $gates),
         'canStart' => !in_array(false, array_column($gates, 1), true) && !in_array('wait', array_column($gates, 1), true),
+        'retake' => $rs, 'result' => $e['result'] ?? null, 'finalScore' => $e['final_score'] ?? null,
+        'passing' => $cfg['passing'], 'questionCount' => count($cfg['questions']), 'duration' => TRAININGS[$e['training']]['exams'][$e['exam']]['duration'] ?? 0,
+        'attempts' => array_map(fn($a) => public_attempt($a), enrollment_attempts($d, $e['id'])),
     ];
 }

@@ -32,7 +32,8 @@ const TRAININGS = [
 
 /** exam = null berarti berlaku untuk semua ujian pelatihan. used = voucher yang sudah terpakai/terikat sebelum sistem ini. */
 const VOUCHER_BATCHES = [
-    'VB-2611-014' => ['training' => 'TRN-DA-2611', 'exam' => 'EXM-DA-T', 'qty' => 80, 'used' => 60, 'order' => 'ORD-2026-0311', 'order_status' => 'PAID', 'valid_until' => '2026-12-31', 'type' => 'Individual'],
+    'VB-2611-014' => ['training' => 'TRN-DA-2611', 'exam' => 'EXM-DA-T', 'qty' => 120, 'used' => 60, 'order' => 'ORD-2026-0311', 'order_status' => 'PAID', 'valid_until' => '2026-12-31', 'type' => 'Individual'],
+    'VB-2611-015' => ['training' => 'TRN-DA-2611', 'exam' => 'EXM-DA-P', 'qty' => 30, 'used' => 0, 'order' => 'ORD-2026-0312', 'order_status' => 'PAID', 'valid_until' => '2026-12-31', 'type' => 'Institusi'],
     'VB-2611-013' => ['training' => 'TRN-DM-2611', 'exam' => null, 'qty' => 50, 'used' => 40, 'order' => 'ORD-2026-0307', 'order_status' => 'CONFIRMED', 'valid_until' => '2027-01-15', 'type' => 'Institusi'],
     'VB-2610-011' => ['training' => 'TRN-CS-2610', 'exam' => 'EXM-CS-T', 'qty' => 130, 'used' => 118, 'order' => 'ORD-2026-0288', 'order_status' => 'PAID', 'valid_until' => '2026-11-15', 'type' => 'Individual'],
     'VB-2612-016' => ['training' => 'TRN-PM-2612', 'exam' => 'EXM-PM-T', 'qty' => 40, 'used' => 0, 'order' => 'ORD-2026-0320', 'order_status' => 'CONFIRMED', 'valid_until' => '2027-02-28', 'type' => 'Institusi'],

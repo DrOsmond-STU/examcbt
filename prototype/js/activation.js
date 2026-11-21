@@ -50,8 +50,12 @@
     if (!v || !v.start) return '';
     const o = { timeZone: v.tz };
     const tz = { 'Asia/Jakarta': 'WIB', 'Asia/Makassar': 'WITA', 'Asia/Jayapura': 'WIT' }[v.tz] || '';
-    return `${new Date(v.start).toLocaleDateString(App.locale(), { ...o, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${new Date(v.start).toLocaleTimeString(App.locale(), { ...o, hour: '2-digit', minute: '2-digit' })}–${new Date(v.end).toLocaleTimeString(App.locale(), { ...o, hour: '2-digit', minute: '2-digit' })} ${tz}`;
+    const d = (x, long) => new Date(x).toLocaleDateString(App.locale(), { ...o, ...(long ? { weekday: 'long' } : {}), day: 'numeric', month: long ? 'long' : 'short', year: 'numeric' });
+    const t = (x) => new Date(x).toLocaleTimeString(App.locale(), { ...o, hour: '2-digit', minute: '2-digit' });
+    if (d(v.start) !== d(v.end)) return `${d(v.start)} ${t(v.start)} – ${d(v.end)} ${t(v.end)} ${tz}`;   // jendela beberapa hari
+    return `${d(v.start, true)} · ${t(v.start)}–${t(v.end)} ${tz}`;
   };
+  App.fmtSched = fmtSched;
   const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   const left = (t) => Math.max(0, Math.round(t - Date.now() / 1000));
   const page = (body, step) => (isGuest ? App.pPreShell(body, step) : App.pShell('p-dashboard', `<div class="pp-narrow stack-lg">${step != null ? stepsLine(step) : ''}${body}</div>`));
@@ -281,16 +285,23 @@
     else if (!me.enrollments.length) body = `<section class="card card-pad stack" style="align-items:flex-start"><h3>Belum ada ujian yang ditugaskan</h3><p class="small muted">Ujian muncul di sini setelah penyelenggara mendaftarkan Anda. Jika Anda sudah menerima kode voucher, masukkan kodenya.</p><button class="btn btn-primary" data-go="p-start">${ic('ticket')} Masukkan voucher</button></section>`;
     else body = me.enrollments.map((e, i) => {
       const sched = fmtSched(e);
-      const statusPill = e.canStart ? pill('Siap dimulai', 'success') : e.voucherState !== 'bound' ? pill(e.voucherState === 'allocated' ? 'Voucher belum diaktifkan' : 'Voucher belum ada', 'warning') : e.scheduleState === 'upcoming' ? pill('Belum dibuka', 'muted') : e.scheduleState === 'closed' ? pill('Jadwal berakhir', 'outline') : pill('Belum memenuhi syarat', 'warning');
-      const action = e.canStart ? `<button class="btn btn-primary" data-go="p-instructions">${ic('play')} Buka ujian</button>`
+      const rs = e.retake || { state: 'none' };
+      const lastAtt = e.attempts && e.attempts.length ? e.attempts[e.attempts.length - 1] : null;
+      const RS = { in_progress: ['Sedang berlangsung', 'teal'], passed: ['Lulus', 'success'], pending_review: ['Menunggu penilaian', 'warning'], exhausted: ['Kesempatan habis', 'danger'],
+        needs_request: ['Tidak lulus · ajukan ujian ulang', 'danger'], requested: ['Retake menunggu persetujuan', 'info'], rejected: ['Retake ditolak', 'danger'], wait: ['Tidak lulus · masa tunggu', 'warning'], available: ['Ujian ulang tersedia', 'success'] };
+      const statusPill = RS[rs.state] && !(rs.state === 'available' && e.canStart) ? pill(RS[rs.state][0], RS[rs.state][1]) : e.canStart ? pill(rs.state === 'available' ? 'Ujian ulang tersedia' : 'Siap dimulai', 'success') : e.voucherState !== 'bound' ? pill(e.voucherState === 'allocated' ? 'Voucher belum diaktifkan' : 'Voucher belum ada', 'warning') : e.scheduleState === 'upcoming' ? pill('Belum dibuka', 'muted') : e.scheduleState === 'closed' ? pill('Jadwal berakhir', 'outline') : pill('Belum memenuhi syarat', 'warning');
+      const resultBtn = lastAtt && lastAtt.status !== 'IN_PROGRESS' ? `<button class="btn btn-secondary" data-action="openResult" data-id="${esc(lastAtt.id)}">${ic('file')} Lihat hasil${e.finalScore != null ? ' · ' + e.finalScore : ''}</button>` : '';
+      const action = rs.state === 'in_progress' ? `<button class="btn btn-primary" data-action="resumeExam" data-id="${esc(rs.attempt)}">${ic('play')} Lanjutkan ujian</button>`
+        : e.canStart ? `<button class="btn btn-primary" data-action="openExam" data-id="${esc(e.id)}">${ic('play')} ${rs.used ? 'Buka ujian ulang' : 'Buka ujian'}</button>${resultBtn}`
+        : lastAtt ? resultBtn
         : e.voucherState !== 'bound' ? `<button class="btn btn-primary" data-go="p-start">${ic('ticket')} ${e.voucherState === 'allocated' ? 'Aktivasi voucher' : 'Masukkan voucher'}</button>`
-        : `<button class="btn btn-secondary" disabled>${ic('clock')} ${e.scheduleState === 'upcoming' ? 'Ujian belum dibuka' : 'Tidak tersedia'}</button>`;
+        : `<button class="btn btn-secondary" data-action="openExam" data-id="${esc(e.id)}">${ic('clock')} ${e.scheduleState === 'upcoming' ? 'Ujian belum dibuka · lihat syarat' : 'Lihat syarat akses'}</button>`;
       return `<section class="card"><div class="exam-card">
-        <div class="row-between"><span class="eyebrow">${i === 0 ? 'Ujian berikutnya' : 'Ujian ditugaskan'}</span>${statusPill}</div>
+        <div class="row-between"><span class="eyebrow">${e.status === 'COMPLETED' ? 'Ujian selesai' : 'Ujian ditugaskan'}</span>${statusPill}</div>
         <div class="stack" style="gap:4px"><h2>${esc(e.trainingName)} — ${esc(e.examName)}</h2><p class="small muted"><span class="mono">${esc(e.id)}</span>${e.voucher ? ` · voucher <span class="mono">${esc(e.voucher)}</span>` : ''}</p></div>
         <div class="exam-meta"><span>${ic('calendar', 'ic-sm')} ${esc(sched)}</span></div>
         <div class="grid g2" style="gap:16px;align-items:start"><div class="gate">${e.gates.map(gateRow).join('')}</div>
-          <div class="stack small muted" style="gap:6px"><span>${ic('info', 'ic-sm')} Server memeriksa ulang semua syarat saat Anda menekan Mulai. Enrollment saja tidak membuka akses.</span>${e.canStart ? '<span class="xs dim">Ruang ujian pada purwarupa ini masih berupa simulasi.</span>' : ''}</div></div>
+          <div class="stack small muted" style="gap:6px"><span>${ic('info', 'ic-sm')} Server memeriksa ulang semua syarat saat Anda menekan Mulai. Enrollment saja tidak membuka akses.</span>${e.attempts && e.attempts.length ? `<span class="xs dim">Attempt terpakai ${rs.used} dari ${rs.max}${e.finalScore != null ? ` · nilai akhir ${e.finalScore} (lulus ≥ ${e.passing})` : ''}.</span>` : ''}</div></div>
         <div class="row">${action}</div>
       </div></section>`;
     }).join('');

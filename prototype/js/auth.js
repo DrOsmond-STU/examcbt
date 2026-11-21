@@ -41,6 +41,7 @@
     export: 'report.export', exportOk: 'report.export',
     inviteUser: 'user.write', sessions: 'user.write',
     enrollWizard: 'enrollment.write', enrollSubmit: 'enrollment.write', enrollCancel: 'enrollment.write',
+    opsExtend: 'monitoring.write', gRub: 'grade.write', gSave: 'grade.write', rtYes: 'retake.decide', rtNo: 'retake.decide', ocApprove: 'cert.approve', ocRevoke: 'cert.write',
     userCreate: 'user.write', userCreateOk: 'user.write', userEdit: 'user.write', userEditOk: 'user.write', userReset: 'user.write', userToggle: 'user.write',
   };
   const permLabel = (p) => (SES.permLabels && SES.permLabels[p]) || p;

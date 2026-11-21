@@ -33,6 +33,16 @@
     'otp.fail': ['OTP salah', 'warning'],
     'participant.login': ['Peserta masuk (OTP)', 'success'],
     'participant.login_fail': ['Peserta gagal masuk (OTP)', 'danger'],
+    'attempt.start': ['Mulai ujian', 'info'],
+    'attempt.submit': ['Mengirim jawaban ujian', 'success'],
+    'attempt.extend': ['Perpanjang waktu ujian', 'warning'],
+    'grade.finalize': ['Menilai essay', 'teal'],
+    'retake.request': ['Pengajuan ujian ulang', 'info'],
+    'retake.approve': ['Menyetujui ujian ulang', 'success'],
+    'retake.reject': ['Menolak ujian ulang', 'danger'],
+    'certificate.issue': ['Menerbitkan sertifikat', 'success'],
+    'certificate.revoke': ['Mencabut sertifikat', 'danger'],
+    'system.seed': ['Data dummy dibuat', 'muted'],
   };
   const actionPill = (a) => { const [l, t] = ACTIONS[a] || [a, 'outline']; return pill(l, t); };
   const fmt = (iso) => new Date(iso).toLocaleString(App.locale(), { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -96,7 +106,7 @@
         <div class="toolbar">
           <label class="input-group">${ic('search', 'ic-sm')}<input id="au-q" placeholder="Cari aktor, aksi, detail, atau IP" value="${esc(f.q)}" data-bind="auditQ"></label>
           <select class="select" aria-label="Kategori" data-change="auditF" data-k="cat">
-            ${[['', 'Kategori: Semua'], ['auth', 'Autentikasi'], ['user', 'Pengelolaan pengguna'], ['account', 'Akun & kata sandi'], ['enrollment', 'Enrollment'], ['voucher', 'Aktivasi voucher & OTP'], ['audit', 'Ekspor audit']].map(([v, l]) => `<option value="${v}" ${f.cat === v ? 'selected' : ''}>${l}</option>`).join('')}
+            ${[['', 'Kategori: Semua'], ['auth', 'Autentikasi'], ['user', 'Pengelolaan pengguna'], ['account', 'Akun & kata sandi'], ['enrollment', 'Enrollment'], ['voucher', 'Aktivasi voucher & OTP'], ['exam', 'Ujian & penilaian'], ['certificate', 'Sertifikat'], ['audit', 'Ekspor audit'], ['system', 'Sistem']].map(([v, l]) => `<option value="${v}" ${f.cat === v ? 'selected' : ''}>${l}</option>`).join('')}
           </select>
           <select class="select" aria-label="Aktor" data-change="auditF" data-k="actor"><option value="">Aktor: Semua</option>${d ? d.actors.map((a) => `<option value="${esc(a.username)}" ${f.actor === a.username ? 'selected' : ''}>${esc(a.name ? `${a.name} (${a.username})` : a.username)}</option>`).join('') : ''}</select>
           <label class="row small" style="gap:6px;flex-wrap:nowrap"><span class="muted">Dari</span><input type="date" class="input" style="width:auto;height:38px" value="${esc(f.from)}" data-change="auditF" data-k="from" aria-label="Dari tanggal"></label>

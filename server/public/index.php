@@ -23,11 +23,11 @@ if (!$user && session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['pid']
 // Tamu tanpa session mengambil token lewat api/csrf.php; bila session sudah ada (mis. di tengah aktivasi), halaman tidak di-cache dan token disertakan.
 $csrf = session_status() === PHP_SESSION_ACTIVE ? csrf_token() : null;
 
-$js = ['core.js', 'i18n-en.js', 'i18n.js', 'data.js', 'hub.js'];
+$js = ['core.js', 'i18n-en.js', 'i18n.js', 'data.js', 'hub.js', 'verifylive.js'];
 // Portal peserta (termasuk aktivasi voucher) dikirim ke tamu dan peserta; modul admin hanya ke role admin.
 $isParticipantPortal = !$user || in_array('participant', $user['bundles'], true);
-if ($isParticipantPortal) { $js[] = 'participant.js'; $js[] = 'activation.js'; }
-if ($user && in_array('admin', $user['bundles'], true)) { $js[] = 'admin.js'; $js[] = 'users.js'; $js[] = 'audit.js'; $js[] = 'enroll.js'; }
+if ($isParticipantPortal) { $js[] = 'participant.js'; $js[] = 'activation.js'; $js[] = 'examlive.js'; }
+if ($user && in_array('admin', $user['bundles'], true)) { $js[] = 'admin.js'; $js[] = 'users.js'; $js[] = 'audit.js'; $js[] = 'enroll.js'; $js[] = 'ops.js'; }
 $js[] = 'auth.js';
 
 $session = [
