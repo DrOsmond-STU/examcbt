@@ -10,7 +10,7 @@ Live: https://examcbt.semestateknologiutama.com
 │   ├── index.php      ← memilih modul antarmuka sesuai role (modul lain tidak dikirim)
 │   ├── styles.css
 │   ├── .htaccess      ← paksa HTTPS, header keamanan
-│   └── api/           ← csrf, login, logout, ping, users (kelola pengguna), account (ganti kata sandi)
+│   └── api/           ← csrf, login, logout, ping, users (kelola pengguna), account (ganti kata sandi), audit (audit log)
 └── app/               ← di luar document root
     ├── rbac.php       ← role, halaman, permission
     ├── bootstrap.php  ← session, CSRF, pembatasan login, audit log
@@ -63,6 +63,25 @@ Membuat ulang akun awal dari nol (hanya bila `users.json` dihapus):
 php server/tools/make-users.php /path/aman/credentials.tsv
 server/build.sh
 ```
+
+## Audit log
+
+Semua kejadian keamanan ditulis ke `app/storage/audit.log` (satu baris JSON per kejadian: waktu UTC, aktor, role saat kejadian, aksi, IP, detail).
+File hanya ditambah; aplikasi tidak menyediakan cara mengubah atau menghapus isinya.
+
+Halaman **Audit Log** membaca file ini lewat `api/audit.php` (Super Admin, Organization Admin, Auditor):
+pencarian, filter kategori/aktor/tanggal (WIB), paginasi, ringkasan 24 jam/7 hari, dan **Ekspor CSV** (butuh izin ekspor; setiap ekspor ikut tercatat sebagai `audit.export`).
+Kartu "Aktivitas terbaru" di dashboard juga memakai data ini untuk role tersebut.
+
+| Kode aksi | Arti |
+|---|---|
+| `auth.login` / `auth.logout` / `auth.timeout` | Masuk, keluar, sesi berakhir karena tidak aktif |
+| `auth.fail` / `auth.locked` | Gagal masuk, login dikunci sementara |
+| `user.create` / `user.update` / `user.activate` / `user.deactivate` / `user.reset_password` | Pengelolaan pengguna |
+| `account.change_password` / `account.change_password_fail` | Ganti kata sandi sendiri |
+| `audit.export` | Ekspor audit log |
+
+Catatan: 24 baris paling awal di file log server (IP `127.0.0.1`, 21 Nov 2026 10:05 UTC) berasal dari pengujian lokal yang ikut terunggah satu kali, bukan aktivitas nyata.
 
 ## Build & deploy
 

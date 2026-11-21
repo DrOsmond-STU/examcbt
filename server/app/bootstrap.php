@@ -194,6 +194,7 @@ function audit(string $action, string $actor, string $detail = ''): void
     $line = json_encode([
         't'      => gmdate('c'),
         'actor'  => $actor,
+        'role'   => users()[$actor]['role'] ?? '',   // role pelaku saat kejadian
         'action' => $action,
         'ip'     => client_ip(),
         'detail' => $detail,

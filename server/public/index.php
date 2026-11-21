@@ -13,7 +13,7 @@ $csrf = $user ? csrf_token() : null;   // tamu mengambil token lewat api/csrf.ph
 $js = ['core.js', 'i18n-en.js', 'i18n.js', 'data.js', 'hub.js'];
 if ($user) {
     if (in_array('participant', $user['bundles'], true)) $js[] = 'participant.js';
-    if (in_array('admin', $user['bundles'], true))       { $js[] = 'admin.js'; $js[] = 'users.js'; }
+    if (in_array('admin', $user['bundles'], true))       { $js[] = 'admin.js'; $js[] = 'users.js'; $js[] = 'audit.js'; }
 }
 $js[] = 'auth.js';
 

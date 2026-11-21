@@ -134,8 +134,8 @@
         </div>
       </section>
       <section class="card">
-        <div class="card-head"><h3>Aktivitas terbaru</h3><button class="btn btn-ghost btn-sm" data-go="a-audit">Audit log ${ic('chevR', 'ic-sm')}</button></div>
-        <div class="card-body feed" style="padding-top:4px;padding-bottom:4px">
+        <div class="card-head"><div class="row" style="gap:8px"><h3>Aktivitas terbaru</h3><span class="tag" id="recent-feed-tag" hidden>Data asli</span></div><button class="btn btn-ghost btn-sm" data-go="a-audit">Audit log ${ic('chevR', 'ic-sm')}</button></div>
+        <div class="card-body feed" id="recent-feed" style="padding-top:4px;padding-bottom:4px">
           ${D.audit.slice(0, 5).map((a) => `<div class="feed-item"><div class="avatar avatar-sm">${a.actor === 'Sistem' ? 'SY' : App.initials(a.actor)}</div><div><div class="small"><b>${a.actor}</b> · <code class="xs">${a.act}</code></div><div class="xs dim" style="overflow-wrap:anywhere">${a.ent}</div></div><span class="xs dim num">${a.t.slice(12, 17)}</span></div>`).join('')}
         </div>
       </section>
