@@ -31,7 +31,7 @@ if ($user && in_array('admin', $user['bundles'], true)) { $js[] = 'admin.js'; $j
 $js[] = 'auth.js';
 
 $session = [
-    'user'    => $user ? array_intersect_key($user, array_flip(['username', 'name', 'email', 'role', 'roleLabel', 'lastLogin', 'via'])) : null,
+    'user'    => $user ? array_intersect_key($user, array_flip(['username', 'name', 'email', 'role', 'roleLabel', 'lastLogin', 'via', 'demo'])) : null,
     'otpDemo' => OTP_DEMO_DISPLAY,
     'mustChange' => $user['mustChange'] ?? false,
     'passwordMin' => PASSWORD_MIN,

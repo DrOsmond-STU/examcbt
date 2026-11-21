@@ -93,5 +93,6 @@ function public_user(string $username, array $u): array
         'lastLogin'  => $u['last_login'] ?? null,
         'createdAt'  => $u['created_at'] ?? null,
         'createdBy'  => $u['created_by'] ?? null,
+        'demo'       => !empty($u['demo']),
     ];
 }

@@ -10,6 +10,7 @@ start_session();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') json_out(['ok' => false, 'error' => 'method'], 405);
 if (!check_csrf()) json_out(['ok' => false, 'error' => 'csrf'], 403);
 $me = require_user(true);
+if (!empty($me['demo'])) json_out(['ok' => false, 'error' => 'demo'], 403);   // akun demo dipakai bersama
 
 $in      = read_json_body();
 $current = (string)($in['current'] ?? '');

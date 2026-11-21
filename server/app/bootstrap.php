@@ -77,6 +77,10 @@ function current_user(): ?array
         return null;
     }
     $role = ROLES[$u['role']];
+    $demo = !empty($u['demo']);
+    // Akun demo (dipakai bersama calon klien): tidak bisa mengelola pengguna dan tidak bisa mengganti kata sandi.
+    $perms = $role['perms'];
+    if ($demo) $perms = array_values(array_diff($perms === ['*'] ? array_keys(PERMISSIONS) : $perms, ['user.write']));
     return [
         'username'   => $uid,
         'name'       => $u['name'],
@@ -85,10 +89,11 @@ function current_user(): ?array
         'roleLabel'  => $role['label'],
         'home'       => $role['home'],
         'routes'     => $role['routes'],
-        'perms'      => $role['perms'],
+        'perms'      => $perms,
         'bundles'    => $role['bundles'],
-        'mustChange' => !empty($u['must_change']),
+        'mustChange' => !$demo && !empty($u['must_change']),
         'lastLogin'  => $u['prev_login'] ?? null,
+        'demo'       => $demo,
     ];
 }
 

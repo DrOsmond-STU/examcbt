@@ -172,6 +172,7 @@
     pw_same: () => 'Kata sandi baru harus berbeda dari kata sandi saat ini.',
     csrf: () => 'Sesi halaman kedaluwarsa. Muat ulang halaman lalu coba lagi.',
     network: () => 'Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi.',
+    demo: () => 'Akun demo dipakai bersama, sehingga kata sandinya tidak dapat diubah.',
   };
   const pwRules = (pw, confirm) => [
     [pw.length >= SES.passwordMin, `Minimal ${SES.passwordMin} karakter`],
@@ -192,7 +193,7 @@
         <div class="stack" style="gap:4px"><h2>Akun saya</h2><p class="small muted">${esc(u.name)} · ${esc(u.roleLabel)}</p></div>
         <dl class="dl"><dt>Nama pengguna</dt><dd class="mono">${esc(u.username)}</dd><dt>Email</dt><dd>${esc(u.email)}</dd><dt>Role</dt><dd>${esc(u.roleLabel)}</dd><dt>Login sebelumnya</dt><dd>${App.fmtDateTime(u.lastLogin)}</dd></dl>
         <hr class="hr">
-        <h3>Ganti kata sandi</h3>
+        ${u.demo ? `<div class="callout callout-info">${ic('info')}<div class="small"><b>Akun demo.</b> Akun ini dipakai bersama oleh calon klien, sehingga kata sandinya tidak dapat diubah dan fitur kelola pengguna dinonaktifkan.</div></div>` : `<h3>Ganti kata sandi</h3>
         ${S.pwError ? `<div class="callout callout-danger" role="alert">${ic('alert')}<div class="small">${S.pwError}</div></div>` : ''}
         <form class="stack" id="pw-form" novalidate>
           <input type="text" autocomplete="username" value="${esc(u.username)}" hidden>
@@ -203,7 +204,7 @@
           <label class="check"><input type="checkbox" id="pw-show"><span class="small">Tampilkan kata sandi</span></label>
           <button class="btn btn-primary btn-lg btn-block" type="submit" id="pw-btn">Simpan kata sandi baru</button>
         </form>
-        <p class="xs dim">Setelah kata sandi diganti, semua sesi lain untuk akun ini otomatis keluar.</p>
+        <p class="xs dim">Setelah kata sandi diganti, semua sesi lain untuk akun ini otomatis keluar.</p>`}
         <button class="btn btn-ghost btn-sm" style="align-self:flex-start" data-action="logout">${ic('logout', 'ic-sm')} Keluar</button>
       </section></div>`;
   };
