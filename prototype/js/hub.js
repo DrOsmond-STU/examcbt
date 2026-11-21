@@ -15,7 +15,7 @@
       <div class="hub-inner">
         <div class="row" style="justify-content:space-between;flex-wrap:nowrap;align-items:flex-start">
           <div class="row" style="flex-wrap:nowrap"><div class="logo">TA</div><div><b style="font:700 15px var(--font-display);color:#fff">TACMS</b><div class="xs" style="color:#8fa3c8">Training Assessment &amp; Certification Management System</div></div></div>
-          <button class="icon-btn" style="color:#c5d2ea" data-action="theme" aria-label="Ganti tema">${ic(App.isDark() ? 'sun' : 'moon')}</button>
+          <div class="row" style="flex-wrap:nowrap;gap:6px">${App.langToggle()}<button class="icon-btn" style="color:#c5d2ea" data-action="theme" aria-label="Ganti tema">${ic(App.isDark() ? 'sun' : 'moon')}</button></div>
         </div>
         <h1>Purwarupa UI/UX TACMS</h1>
         <p>Purwarupa klikabel berdasarkan SRS v1.1: alur voucher dan OTP, ruang ujian, penilaian, retake, sertifikat, serta verifikasi publik. Semua data adalah contoh fiktif.</p>
@@ -132,14 +132,14 @@
             <dt>Masa berlaku</dt><dd>${r.c.exp === '—' ? 'Tanpa batas' : 'Sampai ' + esc(r.c.exp)}</dd>
             <dt>Penerbit</dt><dd>${esc(D.org.name)}</dd>
           </dl>
-          <p class="xs dim">Diperiksa ${new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}. Halaman ini sengaja tidak menampilkan email, telepon, nilai, atau data pribadi lain.</p>
+          <p class="xs dim">Diperiksa ${new Date().toLocaleString(App.locale(), { dateStyle: 'medium', timeStyle: 'short' })}. Halaman ini sengaja tidak menampilkan email, telepon, nilai, atau data pribadi lain.</p>
         </div>` : `<div class="card-body"><p class="small muted">Nomor yang dicari: <code>${esc(r.q)}</code></p></div>`}
       </section>`;
     }
     return `<div class="verify">
       <div class="row" style="justify-content:space-between;width:min(560px,100%)">
         <button class="pp-brand" data-go="home"><div class="logo">TN</div><div><b>${esc(D.org.name)}</b><small>Verifikasi Sertifikat</small></div></button>
-        ${App.themeBtn()}
+        <div class="row" style="flex-wrap:nowrap;gap:6px">${App.langToggle()}${App.themeBtn()}</div>
       </div>
       <section class="card verify-card card-pad stack-lg">
         <div class="stack" style="gap:6px"><h1>Cek keaslian sertifikat</h1><p class="muted">Masukkan nomor sertifikat seperti tertulis pada dokumen, atau pindai QR Code pada sertifikat.</p></div>

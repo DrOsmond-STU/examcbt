@@ -30,6 +30,7 @@
         <button class="icon-btn menu-btn" data-action="navToggle" aria-label="Menu">${ic('menu')}</button>
         <div class="crumbs">${groupOf(route) !== titleOf(route) ? `${groupOf(route)} ${ic('chevR', 'ic-sm')} ` : ''}<b>${titleOf(route)}</b></div>
         <label class="input-group search">${ic('search', 'ic-sm')}<input placeholder="Cari peserta, voucher, sertifikat…" aria-label="Pencarian global"><span class="tag">/</span></label>
+        ${App.langToggle()}
         <button class="icon-btn" aria-label="Notifikasi" data-action="aNotif">${ic('bell')}</button>
         ${App.themeBtn()}
         <div class="avatar">${App.initials(D.admin.name)}</div>
@@ -56,7 +57,7 @@
   App.routes['a-login'] = () => `
   <div class="verify" style="justify-content:center">
     <section class="card verify-card card-pad stack-lg" style="max-width:420px">
-      <div class="row"><div class="logo">TA</div><div><b style="font:700 16px var(--font-display)">TACMS Admin</b><div class="xs dim">${esc(D.org.name)}</div></div></div>
+      <div class="row-between" style="flex-wrap:nowrap"><div class="row" style="flex-wrap:nowrap"><div class="logo">TA</div><div><b style="font:700 16px var(--font-display)">TACMS Admin</b><div class="xs dim">${esc(D.org.name)}</div></div></div>${App.langToggle()}</div>
       ${S.loginStep === 2 ? `
         <div class="stack" style="gap:4px"><h2>Verifikasi dua langkah</h2><p class="small muted">Masukkan 6 digit kode dari aplikasi autentikator Anda.</p></div>
         <div class="otp">${[0, 1, 2, 3, 4, 5].map((i) => `<input inputmode="numeric" maxlength="1" aria-label="Digit ${i + 1}" value="${'482915'[i]}">`).join('')}</div>

@@ -6,6 +6,10 @@ Purwarupa klikabel (HTML/CSS/JS murni, tanpa build) untuk **Training Assessment 
 
 Buka `prototype/index.html` langsung di browser. Halaman awal (`#home`) adalah peta prototipe berisi semua layar dan alur utama.
 
+## Bahasa (ID / EN)
+
+Setiap portal punya pemilih **ID | EN** di bilah atas. Pilihan bahasa diingat di browser. Layar dirender dalam Bahasa Indonesia, lalu `js/i18n.js` menerjemahkan teks yang tampil (termasuk modal, toast, tanggal, angka, dan format mata uang) memakai kamus `js/i18n-en.js`. Untuk menambah atau memperbaiki terjemahan, tambahkan pasangan teks Indonesia → Inggris di `dict`, atau pola di `rules` untuk teks yang memuat angka atau nama.
+
 ## Cakupan layar
 
 | Area | Layar | Rujukan SRS |
@@ -39,6 +43,8 @@ prototype/
 ├── styles.css          # design tokens (navy/teal, Inter + Plus Jakarta Sans), tema terang & gelap
 └── js/
     ├── core.js         # router hash, ikon, modal, toast, konfirmasi
+    ├── i18n.js         # lapisan bahasa ID ⇄ EN
+    ├── i18n-en.js      # kamus Bahasa Inggris
     ├── data.js         # data contoh
     ├── hub.js          # peta prototipe & verifikasi publik
     ├── participant.js  # portal peserta & exam workspace

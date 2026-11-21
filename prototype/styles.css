@@ -526,3 +526,11 @@ code, .mono { font-family: var(--font-mono); font-size: .92em; }
 .show-sm { display: none; }
 @media (max-width: 900px) { .show-sm { display: inline-flex; } }
 @media (min-width: 961px) { .fab-admin .proto-fab { left: calc(252px + max(16px, env(safe-area-inset-left, 0px))); } }
+
+/* Pemilih bahasa */
+.lang-seg { padding: 2px; flex: none; }
+.lang-seg button { padding: 4px 8px; font-size: 11px; letter-spacing: .04em; }
+.hub-hero .lang-seg { background: rgba(255, 255, 255, .1); }
+.hub-hero .lang-seg button { color: #c5d2ea; }
+.hub-hero .lang-seg button.on { background: #fff; color: #0e2148; }
+@media (max-width: 520px) { .pp-top .pp-brand > div:not(.logo) { display: none; } }

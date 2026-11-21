@@ -12,7 +12,7 @@
     <header class="pp-top"><div class="pp-top-inner">
       <button class="pp-brand" data-go="home"><div class="logo">TN</div><div><b>${esc(D.org.name)}</b><small>Portal Peserta</small></div></button>
       <div class="grow"></div>
-      <div class="seg" role="group" aria-label="Bahasa"><button class="on">ID</button><button>EN</button></div>
+      ${App.langToggle()}
       ${App.themeBtn()}
     </div></header>
     <main class="pp-main"><div class="pp-narrow stack-lg">
@@ -39,6 +39,7 @@
       <button class="pp-brand" data-go="p-dashboard"><div class="logo">TN</div><div><b>${esc(D.org.name)}</b><small>Portal Peserta</small></div></button>
       <nav class="pp-nav">${navItems.map(([r, l]) => `<button class="${active === r ? 'on' : ''}" data-go="${r}">${l}</button>`).join('')}</nav>
       <div class="grow"></div>
+      ${App.langToggle()}
       <button class="icon-btn" aria-label="Notifikasi" data-action="pNotif">${ic('bell')}</button>
       ${App.themeBtn()}
       <div class="avatar" title="${esc(S.identity.name)}">${App.initials(S.identity.name)}</div>
@@ -132,7 +133,7 @@
     const left = 5 - o.attempts;
     if (o.verified) return `<section class="card card-pad row" style="flex-wrap:nowrap">
       <div style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--success-soft);color:var(--success);flex:none">${ic('check')}</div>
-      <div class="grow"><h4>${title} terverifikasi</h4><div class="small muted">${esc(mask(k))} · ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div></div>${pill('Terverifikasi', 'success')}</section>`;
+      <div class="grow"><h4>${title} terverifikasi</h4><div class="small muted">${esc(mask(k))} · ${new Date().toLocaleTimeString(App.locale(), { hour: '2-digit', minute: '2-digit' })}</div></div>${pill('Terverifikasi', 'success')}</section>`;
     return `<section class="card card-pad stack">
       <div class="row-between"><div class="row">${ic(k === 'email' ? 'mail' : 'phone')}<h4>${title}</h4></div>${pill(left <= 0 ? 'Terkunci' : 'Menunggu kode', left <= 0 ? 'danger' : 'warning')}</div>
       <p class="small muted">Kode 6 digit dikirim melalui ${via} ke <b>${esc(mask(k))}</b>. Berlaku 5 menit.</p>
@@ -329,7 +330,7 @@
 
   const autosaveHTML = () => {
     const s = S.exam.saved;
-    const t = S.exam.savedAt ? S.exam.savedAt.toLocaleTimeString('id-ID') : '';
+    const t = S.exam.savedAt ? S.exam.savedAt.toLocaleTimeString(App.locale()) : '';
     if (S.exam.offline) return `<span class="autosave offline" id="autosave"><span class="live"></span>Offline · disimpan di perangkat</span>`;
     return `<span class="autosave ${s === 'saving' ? 'saving' : ''}" id="autosave"><span class="live"></span>${s === 'saving' ? 'Menyimpan…' : t ? 'Tersimpan ' + t : 'Tersimpan otomatis'}</span>`;
   };
@@ -360,6 +361,7 @@
           <div class="logo">TN</div>
           <div class="grow" style="min-width:0"><div style="font:650 var(--fs-md) var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(D.exam.short)}</div><div class="xs dim hide-sm">${esc(S.identity.name)} · PAR-2026-00418</div></div>
           <span class="hide-sm">${autosaveHTML()}</span>
+          ${App.langToggle('hide-sm')}
           <span class="timer ${low ? 'low' : ''}" id="timer" role="timer" aria-label="Sisa waktu">${ic('clock', 'ic-sm')}<span id="timer-v">${fmtTime(S.exam.remaining)}</span></span>
           <button class="btn btn-secondary btn-sm ews-mobile-nav" data-action="toggleNav">${ic('grid', 'ic-sm')} ${answeredCount()}/${Q().length}</button>
           <button class="btn btn-primary btn-sm hide-sm" data-action="submitExam">Kirim</button>
@@ -496,7 +498,7 @@
     } else {
       head = `<div class="row" style="gap:24px;align-items:center">${ring(62, 'danger')}<div class="stack" style="gap:8px">${status('Tidak Lulus')}<h2>Belum mencapai nilai lulus</h2><p class="muted small">Nilai 62 · batas lulus 70 · attempt ke-1 dari 3.</p></div></div>`;
       side = S.retakeRequested
-        ? tl([['Pengajuan retake terkirim', 'Hari ini · ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), 's'], ['Persetujuan admin', 'Biasanya 1 hari kerja', 'w'], ['Masa tunggu berakhir', '22 Nov 2026 · 10:31 WIB', ''], ['Attempt ke-2 tersedia', 'Voucher yang sama · tanpa biaya tambahan', '']])
+        ? tl([['Pengajuan retake terkirim', 'Hari ini · ' + new Date().toLocaleTimeString(App.locale(), { hour: '2-digit', minute: '2-digit' }), 's'], ['Persetujuan admin', 'Biasanya 1 hari kerja', 'w'], ['Masa tunggu berakhir', '22 Nov 2026 · 10:31 WIB', ''], ['Attempt ke-2 tersedia', 'Voucher yang sama · tanpa biaya tambahan', '']])
         : `<div class="stack"><h4>Ujian ulang (retake)</h4>
            <div class="gate">
              <div class="gate-row">${ic('checkCircle', 'ok')}<div>Retake diizinkan · sisa 2 attempt</div></div>

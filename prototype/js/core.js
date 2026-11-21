@@ -72,7 +72,7 @@
 
   /* ---------- Util ---------- */
   App.esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  App.fmt = (n) => Number(n).toLocaleString('id-ID');
+  App.fmt = (n) => Number(n).toLocaleString(App.locale ? App.locale() : 'id-ID');
   App.initials = (name) => name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   App.pill = (text, tone = 'muted', extra = '') => `<span class="pill pill-${tone} ${extra}">${App.esc(text)}</span>`;
 
